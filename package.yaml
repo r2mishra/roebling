@@ -24,6 +24,7 @@ dependencies:
 - http-conduit
 - bytestring
 - http-types
+- timeit
 
 ghc-options:
 - -Wall
