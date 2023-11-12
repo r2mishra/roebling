@@ -7,3 +7,6 @@ multi:
 
 mega:
 	uvicorn dummy_server.app:app --workers 40
+
+run:
+	stack run http://localhost:8000/slow

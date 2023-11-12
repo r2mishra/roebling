@@ -1,6 +1,10 @@
 module Main (main) where
 
 import Lib
+import System.Environment
 
 main :: IO ()
-main = attacker
+main = do
+    [target] <- getArgs
+    attacker target
+    return ()

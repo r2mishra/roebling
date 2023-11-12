@@ -25,6 +25,7 @@ dependencies:
 - bytestring
 - http-types
 - timeit
+- parallel
 
 ghc-options:
 - -Wall
@@ -36,7 +37,6 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
-- -Woverloaded-strings
 
 default-extensions:
   - OverloadedStrings
