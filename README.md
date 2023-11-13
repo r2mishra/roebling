@@ -2,6 +2,12 @@
 
 Implement a command-line based load testing tool in Haskell that can plot metrics related to latency, request statuses, etc in real time. Our idea is to replicate some of the features of [ali](https://github.com/nakabonne/ali).
 
+# Group Members
+- Sumanth R Hegde
+- Rohan Mishra
+- Raj Nawal
+- Om Prakaash
+
 # Features
 - Latency Metrics
 - Load Testing/Sudden spikes
@@ -19,5 +25,6 @@ Our first steps are to break down the project into the following tasks:
 # References
 [Ali](https://github.com/nakabonne/ali) - Reference load testing library implemented in Go
 [Vegeta](https://github.com/tsenart/vegeta) - Go library implementing Pacer and Attacker modules used in Ali 
+
 
 
