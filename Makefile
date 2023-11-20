@@ -14,4 +14,4 @@ run:
 dev:
 	stack build
 	stack install
-	/Users/rohan/.local/bin/roebling-exe --method GET http://localhost:8000/slow
+	roebling-exe --method GET http://localhost:8000/slow
