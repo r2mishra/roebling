@@ -26,6 +26,8 @@ dependencies:
 - http-types
 - timeit
 - parallel
+- async
+- time
 
 ghc-options:
 - -Wall
