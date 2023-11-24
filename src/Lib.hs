@@ -43,20 +43,24 @@ callTargetAsync target = do
         let c = statusCode (responseStatus response)
         endTime <- getCurrentTime
         let duration = endTime `diffUTCTime` startTime
+        putStrLn $ "Status code: " ++ show c ++ ", latency: " ++ show duration
         return (c, duration)
 
-fetchSameUrlMultipleTimes :: String -> Int -> IO [AttackResult]
+fetchSameUrlMultipleTimes :: String -> Int -> IO [Async (Int, NominalDiffTime)]
 fetchSameUrlMultipleTimes url count = do
-    replicateM count (attack url)
-
+    replicateM count (callTargetAsync url)
 
 printAttackResult :: AttackResult -> IO ()
 printAttackResult (AttackResult c d) = putStrLn $ "Status code: " ++ show c ++ ", latency: " ++ show d
 
 numAttacks::Int
-numAttacks = 100
+numAttacks = 10
 
 attacker :: String -> IO ()
 attacker target = do
+    startTime <- getCurrentTime
+    putStrLn $ " Start Time: " ++  show startTime
     responses <- fetchSameUrlMultipleTimes target numAttacks
-    mapM_  printAttackResult responses
+    mapM_ wait responses
+    endTime <- getCurrentTime
+    putStrLn $ " End Time: " ++  show endTime
