@@ -31,6 +31,7 @@ dependencies:
 - optparse-applicative
 - text
 - containers
+- async
 
 ghc-options:
 - -Wall
