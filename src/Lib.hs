@@ -1,18 +1,15 @@
 module Lib
-  ( attacker,
-  )
-where
+    ( attacker
+    ) where
 
-import Control.Monad
-import Control.Parallel.Strategies
 import Network.HTTP.Conduit
-import Network.HTTP.Types (Status (statusCode))
+import Network.HTTP.Types (Status(statusCode))
 import System.TimeIt
 
 import Control.Parallel.Strategies
 import Control.Monad
 import Control.Concurrent.Async
-import Data.ByteString.Lazy
+import Data.ByteString.Lazy hiding (count)
 import Data.Time.Clock (getCurrentTime, diffUTCTime, NominalDiffTime)
 
 data AttackResult = AttackResult { code :: Int, latency :: NominalDiffTime } deriving (Show)
@@ -27,12 +24,12 @@ attack target = do
 
 callTarget :: String -> IO Int
 callTarget target = do
-  manager <- newManager tlsManagerSettings
-  request <- parseRequest target
-  let requestWithUA = request {requestHeaders = [("User-Agent", "roebling")]}
-  response <- httpLbs requestWithUA manager
-  let c = statusCode (responseStatus response)
-  return c
+    manager <- newManager tlsManagerSettings
+    request <- parseRequest target
+    let requestWithUA = request { requestHeaders = [("User-Agent", "roebling")] }
+    response <- httpLbs requestWithUA manager
+    let c = statusCode (responseStatus response)
+    return c
 
 -- Async callTarget
 callTargetAsync :: String -> IO (Async (Int, NominalDiffTime))
@@ -53,12 +50,14 @@ fetchSameUrlMultipleTimes :: String -> Int -> IO [Async (Int, NominalDiffTime)]
 fetchSameUrlMultipleTimes url count = do
     replicateM count (callTargetAsync url)
 
-printAttackResult :: AttackResult -> IO ()
-printAttackResult (AttackResult c d) = putStrLn $ "Status code: " ++ show c ++ ", latency: " ++ show d
-
-numAttacks = 100
+numAttacks::Int
+numAttacks = 50
 
 attacker :: String -> IO ()
 attacker target = do
-  attacks <- replicateM numAttacks (attack target >>= printAttackResult)
-  return ()
+    startTime <- getCurrentTime
+    putStrLn $ " Start Time: " ++  show startTime
+    responses <- fetchSameUrlMultipleTimes target numAttacks
+    mapM_ wait responses
+    endTime <- getCurrentTime
+    putStrLn $ " End Time: " ++  show endTime
