@@ -26,9 +26,9 @@ source-repository head
 library
   exposed-modules:
       Args
+      Chart
       Duration
       Lib
-      Gui.Chart
   other-modules:
       Paths_roebling
   autogen-modules:
@@ -66,8 +66,8 @@ executable roebling-exe
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N2
   build-depends:
-      async
-    , array
+      array
+    , async
     , base >=4.7 && <5
     , bytestring
     , containers
@@ -95,8 +95,8 @@ test-suite roebling-test
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      async
-    , array
+      array
+    , async
     , base >=4.7 && <5
     , bytestring
     , containers

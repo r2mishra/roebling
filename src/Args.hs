@@ -31,7 +31,6 @@ data Flags = Flags
     queryRange :: Int,
     redrawInterval :: Int,
     target :: Text
-    , plotDemo :: Bool
   }
   deriving (Show)
 
