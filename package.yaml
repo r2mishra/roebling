@@ -26,8 +26,12 @@ dependencies:
 - http-types
 - timeit
 - parallel
-- async
+- stm
 - time
+- optparse-applicative
+- text
+- containers
+- async
 
 ghc-options:
 - -Wall
@@ -39,6 +43,7 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
+- -threaded
 
 default-extensions:
   - OverloadedStrings
@@ -53,7 +58,7 @@ executables:
     ghc-options:
     - -threaded
     - -rtsopts
-    - -with-rtsopts=-N
+    - -with-rtsopts=-N2
     dependencies:
     - roebling
 

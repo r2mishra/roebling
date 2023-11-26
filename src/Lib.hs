@@ -1,9 +1,12 @@
 module Lib
-    ( attacker
-    ) where
+  ( attacker,
+  )
+where
 
+import Control.Monad
+import Control.Parallel.Strategies
 import Network.HTTP.Conduit
-import Network.HTTP.Types (Status(statusCode))
+import Network.HTTP.Types (Status (statusCode))
 import System.TimeIt
 
 import Control.Parallel.Strategies
@@ -24,12 +27,12 @@ attack target = do
 
 callTarget :: String -> IO Int
 callTarget target = do
-    manager <- newManager tlsManagerSettings
-    request <- parseRequest target
-    let requestWithUA = request { requestHeaders = [("User-Agent", "roebling")] }
-    response <- httpLbs requestWithUA manager
-    let c = statusCode (responseStatus response)
-    return c
+  manager <- newManager tlsManagerSettings
+  request <- parseRequest target
+  let requestWithUA = request {requestHeaders = [("User-Agent", "roebling")]}
+  response <- httpLbs requestWithUA manager
+  let c = statusCode (responseStatus response)
+  return c
 
 -- Async callTarget
 callTargetAsync :: String -> IO (Async (Int, NominalDiffTime))
@@ -53,14 +56,9 @@ fetchSameUrlMultipleTimes url count = do
 printAttackResult :: AttackResult -> IO ()
 printAttackResult (AttackResult c d) = putStrLn $ "Status code: " ++ show c ++ ", latency: " ++ show d
 
-numAttacks::Int
-numAttacks = 10
+numAttacks = 100
 
 attacker :: String -> IO ()
 attacker target = do
-    startTime <- getCurrentTime
-    putStrLn $ " Start Time: " ++  show startTime
-    responses <- fetchSameUrlMultipleTimes target numAttacks
-    mapM_ wait responses
-    endTime <- getCurrentTime
-    putStrLn $ " End Time: " ++  show endTime
+  attacks <- replicateM numAttacks (attack target >>= printAttackResult)
+  return ()

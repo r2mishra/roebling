@@ -1,10 +1,10 @@
 module Main (main) where
 
-import Lib
-import System.Environment
+import Args
+import Options.Applicative
 
 main :: IO ()
 main = do
-    [target] <- getArgs
-    attacker target
-    return ()
+  flags <- execParser (info (helper <*> flags) fullDesc)
+  print flags
+  putStrLn $ "Attacking " ++ show (target flags)
