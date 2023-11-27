@@ -12,9 +12,9 @@ run:
 	stack run http://localhost:8000/slow
 
 dev:
-	stack build
-	stack install
-	roebling-exe --method GET http://localhost:8000/slow
+	hpack
+	cabal build
+	cabal run roebling-exe  -- --method GET http://localhost:8000/slow
 
 fmt:
 	find . -name '*.hs' | xargs ormolu --mode inplace
