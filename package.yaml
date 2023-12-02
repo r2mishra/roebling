@@ -33,6 +33,8 @@ dependencies:
 - containers
 - async
 - array
+- brick 
+- vty
 
 ghc-options:
 - -Wall

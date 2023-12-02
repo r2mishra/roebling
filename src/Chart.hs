@@ -1,14 +1,19 @@
+--- Reference: https://github.com/madnight/asciichart 
+
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE Safe #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use newtype instead of data" #-}
 
 module Chart
     ( -- * Plot
       plot
     , plotWith
     , plotWith'
-      -- * Options
+    , Options(..)
     , options
+    , getPlotLines
     , height
     ) where
 
@@ -21,13 +26,13 @@ import Text.Printf             (printf)
 import Data.Bool               (bool)
 
 data Options =
-  Options { height :: Int  -- ^ Allows to set the height of the chart.
+  MkOptions { height :: Int  -- ^ Allows to set the height of the chart.
           }
 
 -- | Provides default options: @Options { 'height' = 14 }@.
 options :: Options
 options =
-  Options { height = 14 }
+  MkOptions { height = 14 }
 
 newArray2D :: Integer -> Integer ->
               ST s (STArray s (Integer, Integer) String)
@@ -105,5 +110,7 @@ plotWith options' series = forM_ result $
       putStrLn . dropWhileEnd isSpace . concat
     where result = splitEvery (length series + 4) $ plotWith' options' series
 
--- >>> plotWith' options [1..20]
--- ["20.00"," ","\9508"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","\9581"," "," ","18.64"," ","\9508"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","\9581","\9583"," "," ","17.29"," ","\9508"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","\9581","\9472","\9583"," "," "," ","15.93"," ","\9508"," "," "," "," "," "," "," "," "," "," "," "," "," "," ","\9581","\9583"," "," "," "," "," ","14.57"," ","\9508"," "," "," "," "," "," "," "," "," "," "," "," "," ","\9581","\9583"," "," "," "," "," "," ","13.21"," ","\9508"," "," "," "," "," "," "," "," "," "," "," ","\9581","\9472","\9583"," "," "," "," "," "," "," ","11.86"," ","\9508"," "," "," "," "," "," "," "," "," "," ","\9581","\9583"," "," "," "," "," "," "," "," "," ","10.50"," ","\9508"," "," "," "," "," "," "," "," "," ","\9581","\9583"," "," "," "," "," "," "," "," "," "," "," 9.14"," ","\9508"," "," "," "," "," "," "," ","\9581","\9472","\9583"," "," "," "," "," "," "," "," "," "," "," "," 7.79"," ","\9508"," "," "," "," "," "," ","\9581","\9583"," "," "," "," "," "," "," "," "," "," "," "," "," "," 6.43"," ","\9508"," "," "," "," "," ","\9581","\9583"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," 5.07"," ","\9508"," "," "," ","\9581","\9472","\9583"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," 3.71"," ","\9508"," "," ","\9581","\9583"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," 2.36"," ","\9508"," ","\9581","\9583"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," 1.00"," ","\9532","\9472","\9583"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "]
+-- TODO: what's the magic 4 number used by asciichart?
+getPlotLines :: Options -> [Integer] -> [String]
+getPlotLines options' series = map (dropWhileEnd isSpace . concat) result 
+  where result = splitEvery (length series + 4) $ plotWith' options' series

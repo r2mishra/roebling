@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -42,6 +42,7 @@ library
       array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
@@ -52,6 +53,7 @@ library
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010
 
 executable roebling-exe
@@ -69,6 +71,7 @@ executable roebling-exe
       array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
@@ -80,6 +83,7 @@ executable roebling-exe
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010
 
 test-suite roebling-test
@@ -98,6 +102,7 @@ test-suite roebling-test
       array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
@@ -109,4 +114,5 @@ test-suite roebling-test
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010
