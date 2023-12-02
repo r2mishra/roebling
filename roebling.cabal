@@ -29,6 +29,8 @@ library
       Chart
       Duration
       Lib
+      Pacer
+      Targeter
   other-modules:
       Paths_roebling
   autogen-modules:
@@ -39,7 +41,8 @@ library
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded
   build-depends:
-      array
+      aeson
+    , array
     , async
     , base >=4.7 && <5
     , brick
@@ -68,7 +71,8 @@ executable roebling-exe
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N2
   build-depends:
-      array
+      aeson
+    , array
     , async
     , base >=4.7 && <5
     , brick
@@ -99,7 +103,8 @@ test-suite roebling-test
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      array
+      aeson
+    , array
     , async
     , base >=4.7 && <5
     , brick

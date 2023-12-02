@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Main (main) where
 
 import Args
+import Data.Text (unpack)
 import Lib
 import Options.Applicative
 import Data.Text (unpack)

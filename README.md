@@ -27,4 +27,6 @@ Our first steps are to break down the project into the following tasks:
 [Vegeta](https://github.com/tsenart/vegeta) - Go library implementing Pacer and Attacker modules used in Ali 
 
 
+# Setup instructions
 
+Head over to [SETUP.md](/SETUP.md) for instructions on build management and running the server.
