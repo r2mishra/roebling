@@ -33,6 +33,9 @@ dependencies:
 - text
 - containers
 - async
+- array
+- brick 
+- vty
 
 ghc-options:
 - -Wall
@@ -51,7 +54,7 @@ default-extensions:
 
 library:
   source-dirs: src
-
+  
 executables:
   roebling-exe:
     main:                Main.hs

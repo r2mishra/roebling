@@ -26,10 +26,12 @@ source-repository head
 library
   exposed-modules:
       Args
+      Chart
       Duration
       Lib
       Pacer
       Targeter
+      Widgets
   other-modules:
       Paths_roebling
   autogen-modules:
@@ -41,8 +43,10 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded
   build-depends:
       aeson
+    , array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
@@ -53,6 +57,7 @@ library
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010
 
 executable roebling-exe
@@ -68,8 +73,10 @@ executable roebling-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N2
   build-depends:
       aeson
+    , array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
@@ -81,6 +88,7 @@ executable roebling-exe
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010
 
 test-suite roebling-test
@@ -97,8 +105,10 @@ test-suite roebling-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
+    , array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
@@ -110,4 +120,5 @@ test-suite roebling-test
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010

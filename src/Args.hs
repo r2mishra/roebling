@@ -30,7 +30,8 @@ data Flags = Flags
     resolvers :: Text,
     queryRange :: Int,
     redrawInterval :: Int,
-    target :: Text
+    target :: Text,
+    plotDemo :: Bool
   }
   deriving (Show)
 
@@ -192,4 +193,9 @@ flags =
       str
       ( metavar "target"
           <> help "The target url to attack."
+      )
+    <*> switch
+      ( long "plotDemo"
+          <> short 'v'
+          <> help "Plot a simple dummy chart for the GUI"
       )
