@@ -31,6 +31,7 @@ library
       Lib
       Pacer
       Targeter
+      Widgets
   other-modules:
       Paths_roebling
   autogen-modules:
