@@ -1,6 +1,7 @@
 module Pacer
-  ( PaceConfig,
-    PacerResult,
+  ( 
+    PacerResult(..),
+    PaceConfig(..),
     pace,
   )
 where
@@ -15,12 +16,13 @@ pace :: UTCTime -> Int -> PaceConfig -> IO PacerResult
 pace began hitCount config = do
   now <- getCurrentTime
   let elapsed = now `diffUTCTime` began
+  print $ "Elapsed: " ++ show elapsed
   if elapsed > duration config
     then return PacerResult {stop = True, waitTime = 0}
     else do
-      let expectedHits = round (fromIntegral (rate config) * elapsed)
-      if hitCount < expectedHits
+      let expectedHits = (fromIntegral (rate config) * elapsed)
+      if (fromIntegral hitCount) < expectedHits
         then return PacerResult {stop = False, waitTime = 0}
         else do
-          let sleepTime = (fromIntegral (rate config) * fromIntegral (hitCount + 1)) - elapsed
+          let sleepTime = (fromIntegral hitCount - expectedHits)
           return PacerResult {stop = False, waitTime = sleepTime}
