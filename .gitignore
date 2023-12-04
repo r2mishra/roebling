@@ -1,4 +1,5 @@
 .stack-work/
 *~
 .vscode/
+**/__pycache__/
 dist-newstyle/
