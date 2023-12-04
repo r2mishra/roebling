@@ -32,8 +32,8 @@ attacker manager = do
     let latency = diffUTCTime end begin
     return (latency, statusCode $ responseStatus response)
 
-runAttacker :: PaceConfig -> FilePath -> IO () 
-runAttacker config filePath = do
+runAttacker :: Chan(Maybe(Int, NominalDiffTime)) -> PaceConfig -> FilePath -> IO () 
+runAttacker channel config filePath = do
     began <- getCurrentTime
     manager <- newManager tlsManagerSettings
     resultList <- newMVar []
@@ -57,6 +57,8 @@ runAttacker config filePath = do
                         print("HitCount" ++ show hitCount ++  "Latency: " ++ show latency ++ ", Status Code: " ++ show status)
                         results <- takeMVar resultList
                         putMVar resultList $ results ++ [(hitCount, latency, status)]
+                        print("Senfing hitcount" ++ show hitCount ++ " to channel")
+                        writeChan channel $ Just(hitCount, latency)
                     loop (hitCount + 1)
     loop 0
 

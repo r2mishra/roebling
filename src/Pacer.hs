@@ -24,5 +24,5 @@ pace began hitCount config = do
       if (fromIntegral hitCount) < expectedHits
         then return PacerResult {stop = False, waitTime = 0}
         else do
-          let sleepTime = (fromIntegral hitCount - expectedHits)
+          let sleepTime = (fromIntegral (hitCount + 1) - expectedHits)
           return PacerResult {stop = False, waitTime = sleepTime}

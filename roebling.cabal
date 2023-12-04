@@ -30,6 +30,7 @@ library
       Duration
       Lib
       Pacer
+      ResultLogger
       Targeter
   other-modules:
       Paths_roebling
