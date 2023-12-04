@@ -5,58 +5,25 @@ module Main (main) where
 
 import Data.Text (unpack)
 import Options.Applicative
-import Data.Text (unpack)
 import Data.Time (NominalDiffTime)
 import Chart (Options(..), getPlotLines)
-import Control.Monad (when)
 
 import Lib
 import qualified Widgets as W
 import Args
 
 import Brick
-import qualified Brick.Widgets.ProgressBar as P
 import qualified Brick.Main as M
 import Brick.Widgets.Border.Style
 import Brick.Widgets.Border
-import qualified Brick.Types as T
-
-import qualified Brick.AttrMap as A
-import Brick.Types
-  ( Widget
-  )
-import Brick.Widgets.Core
-  ( (<+>), (<=>)
-  , str
-  , updateAttrMap
-  , overrideAttr
-  )
-import Brick.Util (fg, bg, on, clamp)
-
 import Control.Monad 
-
-import qualified Graphics.Vty as V
-
-import Control.Monad (void)
 #if !(MIN_VERSION_base(4,11,0))
 import Data.Monoid
 #endif
 
-import Lens.Micro.Mtl
-import Lens.Micro.TH
-
 import ProgressBar
-
-
--- Sample data for the chart
-mySeries :: [Integer]
-mySeries = [1..20]
-
-myLatencies :: [NominalDiffTime]
-myLatencies = map fromRational [0.8, 0.7, 0.98, 0.55, 0.66]
-
-myoptions :: Options 
-myoptions  = MkOptions { height = 14 }
+import Widgets (BytesMetrics)
+import SampleData 
 
 plotWidget :: Widget n
 plotWidget = joinBorders $
@@ -65,8 +32,20 @@ plotWidget = joinBorders $
     Brick.str (unlines $ getPlotLines myoptions mySeries)
 
 -- The UI widget that includes the ASCII chart
-ui :: W.ParamsText -> [NominalDiffTime] -> Widget ()
-ui params latencies = vBox [plotWidget, hBox [W.drawParams params, W.drawLatencyStats latencies]]
+ui :: W.Params -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Widget ()
+ui params latencies bytes statuscodes errors otherstats = vBox [
+    plotWidget, 
+    hBox [
+        W.drawParams params, 
+        W.drawLatencyStats latencies,
+        W.drawBytes bytes,
+        vBox [
+            W.drawStatusCodes statuscodes,
+            W.drawErrors errors
+        ],
+        W.drawOtherStats otherstats
+        ]
+    ]
 
 main :: IO ()
 main = do
@@ -74,13 +53,13 @@ main = do
     print cmdFlags
 
     when (plotDemo cmdFlags) $ do
-        let params = W.MakeParams {
+        let params = W.MkParams {
             W.target = target cmdFlags, 
             W.rate = rate cmdFlags,
             W.duration = duration cmdFlags,
             W.method = method cmdFlags
         }
-        simpleMain $ ui params myLatencies
+        simpleMain $ ui params myLatencies myBytes myStatusCodes myErrors myOtherStats
 
     when (progressBar cmdFlags) $ do  
       void $ M.defaultMain theApp initialState

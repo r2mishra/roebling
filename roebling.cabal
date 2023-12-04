@@ -31,6 +31,7 @@ library
       Lib
       Pacer
       ProgressBar
+      SampleData
       Targeter
       Widgets
   other-modules:
@@ -52,7 +53,6 @@ library
     , containers
     , http-conduit
     , http-types
-    , lens
     , microlens-mtl
     , microlens-th
     , optparse-applicative
@@ -85,7 +85,6 @@ executable roebling-exe
     , containers
     , http-conduit
     , http-types
-    , lens
     , microlens-mtl
     , microlens-th
     , optparse-applicative
@@ -120,7 +119,6 @@ test-suite roebling-test
     , containers
     , http-conduit
     , http-types
-    , lens
     , microlens-mtl
     , microlens-th
     , optparse-applicative

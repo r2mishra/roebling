@@ -37,6 +37,7 @@ dependencies:
 - vty
 - microlens-mtl
 - microlens-th
+- aeson
 
 ghc-options:
 - -Wall
