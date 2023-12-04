@@ -77,7 +77,7 @@ instance Show Params where
 
 drawParams :: Params -> Widget ()
 drawParams p = withBorderStyle unicode
-    $ borderWithLabel (str "ParamsText")
+    $ borderWithLabel (str "Params")
     $  Brick.str (show p)
 
 
@@ -104,7 +104,7 @@ instance Show BytesWidget where
 
 drawBytes :: BytesWidget -> Widget ()
 drawBytes b = withBorderStyle unicode
-    $ borderWithLabel (str "BytesText")
+    $ borderWithLabel (str "Bytes")
     $  Brick.str (show b)
 
 newtype StatusCodes = MkStatusCodes {
@@ -116,10 +116,13 @@ instance Show StatusCodes where
     show s = unlines $ map (\(k,v) -> show k ++ ": " ++ show v) (M.toList codes)
         where codes = statusCodes s
 
+-- TODO: Resize to make the full widget Label appear
 drawStatusCodes :: StatusCodes -> Widget ()
-drawStatusCodes s = withBorderStyle unicode
-    $ borderWithLabel (str "ParamsText")
+drawStatusCodes s = hLimit width $ withBorderStyle unicode
+    $ borderWithLabel (str "StatusCodes")
     $  Brick.str (show s)
+    where 
+        width = 15 
 
 -- | Other important statistics for the attack such as throughput, success rate, etc
 data OtherStats = MkOtherStats {
@@ -154,7 +157,7 @@ instance Show OtherStats where
 
 drawOtherStats :: OtherStats -> Widget ()
 drawOtherStats os = withBorderStyle unicode
-    $ borderWithLabel (str "OtherStatsText")
+    $ borderWithLabel (str "OtherStats")
     $  Brick.str (show os)
 
 -- | Errors is the set of unique errors returned by the target server
@@ -168,6 +171,6 @@ instance Show Errors where
 
 drawErrors :: Errors -> Widget ()
 drawErrors e = withBorderStyle unicode
-    $ borderWithLabel (str "ErrorsText")
+    $ borderWithLabel (str "Errors")
     $  Brick.str (show e)
 
