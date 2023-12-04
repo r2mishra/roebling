@@ -82,7 +82,7 @@ main = do
         }
         simpleMain $ ui params myLatencies
 
-    when (progressBarFlag cmdFlags) $ do  
+    when (progressBar cmdFlags) $ do  
       void $ M.defaultMain theApp initialState
 
     attacker (unpack $ target cmdFlags)
