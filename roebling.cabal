@@ -30,6 +30,7 @@ library
       Duration
       Lib
       Pacer
+      ProgressBar
       Targeter
       Widgets
   other-modules:
@@ -51,6 +52,9 @@ library
     , containers
     , http-conduit
     , http-types
+    , lens
+    , microlens-mtl
+    , microlens-th
     , optparse-applicative
     , parallel
     , stm
@@ -81,6 +85,9 @@ executable roebling-exe
     , containers
     , http-conduit
     , http-types
+    , lens
+    , microlens-mtl
+    , microlens-th
     , optparse-applicative
     , parallel
     , roebling
@@ -113,6 +120,9 @@ test-suite roebling-test
     , containers
     , http-conduit
     , http-types
+    , lens
+    , microlens-mtl
+    , microlens-th
     , optparse-applicative
     , parallel
     , roebling
