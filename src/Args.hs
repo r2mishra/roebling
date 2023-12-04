@@ -31,6 +31,7 @@ data Flags = Flags
     queryRange :: Int,
     redrawInterval :: Int,
     target :: Text,
+    plotDemo :: Bool,
     progressBarFlag :: Bool
   }
   deriving (Show)
@@ -101,7 +102,7 @@ flags =
       )
     <*> switch
       ( long "version"
-          <> short 'v'
+          <> short 'v' 
           <> help "Print the current version."
       )
     <*> switch
@@ -194,6 +195,11 @@ flags =
       ( metavar "target"
           <> help "The target url to attack."
       )
+    <*> switch
+      ( long "plotDemo"
+          -- <> short 'v' already being used by version
+          <> help "Plot a simple dummy chart for the GUI"
+      )    
     <*> switch
       (
         long "progressBar"

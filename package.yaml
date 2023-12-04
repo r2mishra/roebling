@@ -24,6 +24,7 @@ dependencies:
   - http-conduit
   - bytestring
   - http-types
+  - aeson
   - timeit
   - parallel
   - stm
@@ -32,6 +33,7 @@ dependencies:
   - text
   - containers
   - async
+  - array
   - brick
   - vty
   - lens
@@ -55,7 +57,7 @@ default-extensions:
 
 library:
   source-dirs: src
-
+  
 executables:
   roebling-exe:
     main: Main.hs
