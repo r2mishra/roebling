@@ -32,7 +32,7 @@ data Flags = Flags
     redrawInterval :: Int,
     target :: Text,
     plotDemo :: Bool,
-    progressBarFlag :: Bool
+    progressBar :: Bool
   }
   deriving (Show)
 
