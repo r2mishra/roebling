@@ -31,7 +31,8 @@ data Flags = Flags
     queryRange :: Int,
     redrawInterval :: Int,
     target :: Text,
-    plotDemo :: Bool
+    plotDemo :: Bool,
+    progressBar :: Bool
   }
   deriving (Show)
 
@@ -101,7 +102,7 @@ flags =
       )
     <*> switch
       ( long "version"
-          <> short 'v'
+          <> short 'v' 
           <> help "Print the current version."
       )
     <*> switch
@@ -196,6 +197,12 @@ flags =
       )
     <*> switch
       ( long "plotDemo"
-          <> short 'v'
+          -- <> short 'v' already being used by version
           <> help "Plot a simple dummy chart for the GUI"
+      )    
+    <*> switch
+      (
+        long "progressBar"
+        <> short 'p'
+        <> help "Show progress bar"
       )

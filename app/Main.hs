@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Main (main) where
 
 import Data.Text (unpack)
@@ -9,13 +10,42 @@ import Data.Time (NominalDiffTime)
 import Chart (Options(..), getPlotLines)
 import Control.Monad (when)
 
-import Brick.Widgets.Border.Style (unicode)
-import Brick
-import Brick.Widgets.Border
-
 import Lib
 import qualified Widgets as W
 import Args
+
+import Brick
+import qualified Brick.Widgets.ProgressBar as P
+import qualified Brick.Main as M
+import Brick.Widgets.Border.Style
+import Brick.Widgets.Border
+import qualified Brick.Types as T
+
+import qualified Brick.AttrMap as A
+import Brick.Types
+  ( Widget
+  )
+import Brick.Widgets.Core
+  ( (<+>), (<=>)
+  , str
+  , updateAttrMap
+  , overrideAttr
+  )
+import Brick.Util (fg, bg, on, clamp)
+
+import Control.Monad 
+
+import qualified Graphics.Vty as V
+
+import Control.Monad (void)
+#if !(MIN_VERSION_base(4,11,0))
+import Data.Monoid
+#endif
+
+import Lens.Micro.Mtl
+import Lens.Micro.TH
+
+import ProgressBar
 
 
 -- Sample data for the chart
@@ -38,7 +68,6 @@ plotWidget = joinBorders $
 ui :: W.Params -> [NominalDiffTime] -> Widget ()
 ui params latencies = vBox [plotWidget, hBox [W.drawParams params, W.drawLatencyStats latencies]]
 
-
 main :: IO ()
 main = do
     cmdFlags <- execParser (info (helper <*> flags) fullDesc)
@@ -52,6 +81,9 @@ main = do
             W.method = method cmdFlags
         }
         simpleMain $ ui params myLatencies
+
+    when (progressBar cmdFlags) $ do  
+      void $ M.defaultMain theApp initialState
 
     attacker (unpack $ target cmdFlags)
     putStrLn $ "Attacking " ++ show (target cmdFlags)

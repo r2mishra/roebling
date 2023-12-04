@@ -24,7 +24,6 @@ dependencies:
 - http-conduit
 - bytestring
 - http-types
-- aeson
 - timeit
 - parallel
 - stm
@@ -36,6 +35,8 @@ dependencies:
 - array
 - brick 
 - vty
+- microlens-mtl
+- microlens-th
 
 ghc-options:
 - -Wall
