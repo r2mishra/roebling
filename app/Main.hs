@@ -35,7 +35,7 @@ plotWidget = joinBorders $
     Brick.str (unlines $ getPlotLines myoptions mySeries)
 
 -- The UI widget that includes the ASCII chart
-ui :: W.ParamsText -> [NominalDiffTime] -> Widget ()
+ui :: W.Params -> [NominalDiffTime] -> Widget ()
 ui params latencies = vBox [plotWidget, hBox [W.drawParams params, W.drawLatencyStats latencies]]
 
 
@@ -45,7 +45,7 @@ main = do
     print cmdFlags
 
     when (plotDemo cmdFlags) $ do
-        let params = W.MakeParams {
+        let params = W.MkParams {
             W.target = target cmdFlags, 
             W.rate = rate cmdFlags,
             W.duration = duration cmdFlags,

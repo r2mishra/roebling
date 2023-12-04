@@ -6,11 +6,14 @@ import qualified Brick.Widgets.Border.Style as BS
 import Brick.Widgets.Border.Style (unicode)
 import Data.Text (Text)
 import Data.List (sort)
-import Data.Time (NominalDiffTime)
+import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem(DoubleElemRep))
+import qualified Data.Map as M
+import Data.Set (Set, toList)
 
-data ParamsText = MakeParams {
+-- | Params is the set of attack parameters
+data Params = MkParams {
     target :: Text, -- target endpoint
     rate :: Int, -- request rate per second
     duration :: Int, -- duration in seconds
@@ -64,15 +67,107 @@ getIntRankPercentile r xs = xs !! floor r
 getFracRankPercentile :: Double -> [Double] -> Double
 getFracRankPercentile r xs = xs !! floor r + 0.5*(xs !! (floor r + 1) - xs !! round r)
 
-instance Show ParamsText where
-    show :: ParamsText -> String
+instance Show Params where
+    show :: Params -> String
     show paramstext = unlines ["Target: " ++ show (target paramstext),
         "Rate: " ++ show (rate paramstext),
         "Duration: " ++ show (duration paramstext),
         "Method: " ++ show (method paramstext)
         ]
 
-drawParams :: ParamsText -> Widget ()
+drawParams :: Params -> Widget ()
 drawParams p = withBorderStyle unicode
     $ borderWithLabel (str "ParamsText")
     $  Brick.str (show p)
+
+
+data BytesMetrics = MkBytesMetrics {
+    total :: Int,
+    mean :: Double
+}
+
+data BytesWidget = MkBytesWidget {
+    inMetrics :: BytesMetrics,
+    outMetrics :: BytesMetrics
+}
+
+instance Show BytesWidget where
+    show :: BytesWidget -> String
+    show b =  unlines [
+        "In:",
+        "  Total: "++ show (total $ inMetrics b),
+        "  Mean: "++ show (mean $ inMetrics b),
+        "Out:",
+        "  Total: "++ show (total $ outMetrics b),
+        "  Mean: "++ show (mean $ outMetrics b)
+        ]
+
+drawBytes :: BytesWidget -> Widget ()
+drawBytes b = withBorderStyle unicode
+    $ borderWithLabel (str "BytesText")
+    $  Brick.str (show b)
+
+newtype StatusCodes = MkStatusCodes {
+    statusCodes :: M.Map String Int
+}
+
+instance Show StatusCodes where
+    show :: StatusCodes -> String
+    show s = unlines $ map (\(k,v) -> show k ++ ": " ++ show v) (M.toList codes)
+        where codes = statusCodes s
+
+drawStatusCodes :: StatusCodes -> Widget ()
+drawStatusCodes s = withBorderStyle unicode
+    $ borderWithLabel (str "ParamsText")
+    $  Brick.str (show s)
+
+-- | Other important statistics for the attack such as throughput, success rate, etc
+data OtherStats = MkOtherStats {
+    -- | Wait is the extra time spent waiting for requests from target
+    wait :: NominalDiffTime,
+    -- | Requests is the number of requests executed
+    requests :: Int,
+    -- | Throughput is the rate of successful requests per second
+    throughput :: Double,
+    -- | Success is the percentage of non-error responses
+    success :: Double,
+    -- | Earliest is the earliest timestamp of a request
+    earliest :: UTCTime,
+    -- | Latest is the latest timestamp of a request
+    latest :: UTCTime,
+    -- | End is the latest timestamp of a response i.e `latest` + request latency 
+    end :: UTCTime
+}
+
+
+instance Show OtherStats where
+    show :: OtherStats -> String
+    show os = unlines [
+        "Wait: " ++ show (wait os),
+        "Requests: " ++ show (requests os),
+        "Throughput: " ++ show (throughput os),
+        "Success: " ++ show (success os),
+        "Earliest: " ++ show (earliest os),
+        "Latest: " ++ show (latest os),
+        "End: " ++ show (end os)
+        ]
+
+drawOtherStats :: OtherStats -> Widget ()
+drawOtherStats os = withBorderStyle unicode
+    $ borderWithLabel (str "OtherStatsText")
+    $  Brick.str (show os)
+
+-- | Errors is the set of unique errors returned by the target server
+newtype Errors = MkErrors {
+    errors :: Set String
+}
+
+instance Show Errors where
+    show :: Errors -> String
+    show e = unlines $ map show (toList $ errors e)
+
+drawErrors :: Errors -> Widget ()
+drawErrors e = withBorderStyle unicode
+    $ borderWithLabel (str "ErrorsText")
+    $  Brick.str (show e)
+
