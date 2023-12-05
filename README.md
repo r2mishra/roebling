@@ -32,6 +32,10 @@ The final UI is supposed to look as follows:
 ![Ali demo](images/ali.gif)
 _GUI from [ali](https://github.com/nakabonne/ali)_
 
+Here is our current UI, shown for dummy data (work in progress):
+
+![Our ui](images/cur_progress.png)
+
 ## Challenges
 We're still figuring out how to set up the async logic for communicating between the attacker and the GUI components. Making a plot with brick is a little hard, so we've chosen to dump an ascii chart of the latencies. 
 
