@@ -1,21 +1,26 @@
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 module ResultLogger(
     runLogger
 )
 where
 
 import Control.Concurrent
-import Data.Time
--- Dummy file to experiment with channels
+import Attacker (AttackResult(..), AttackResultMessage(..))
 
-runLogger :: Chan(Maybe(Int, NominalDiffTime)) -> IO ()
+-- Dummy file to experiment with channels
+runLogger :: Chan AttackResultMessage -> IO ()
 runLogger channel = do
-    print "Logger running"
-    loop 0
+    loop Nothing
     where
-        loop i = do
+        loop msg = do
             res <- readChan channel
             case res of
-                Just(hitCount, latency) -> do
-                    print $ "Logger ==> Hit: " ++ show hitCount ++ ", Latency: " ++ show latency
-                    loop (i + 1)
-                Nothing -> return ()
+                StopMessage hitCount -> do
+                    print $ "Logger ==> Will stop at Hit: " ++ show hitCount
+                    loop $ Just (hitCount - 1)
+                ResultMessage (AttackResult hitCount code latency) -> do
+                    if msg /= Just (hitCount + 1) then  do 
+                        print $ "Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency
+                        loop msg
+                    else do
+                        return ()

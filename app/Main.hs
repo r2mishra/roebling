@@ -19,7 +19,7 @@ main = do
   print cmdFlags
   let paceConfig = Pacer.PaceConfig (Args.rate cmdFlags) (fromIntegral (Args.duration cmdFlags))
   resultChannel <- newChan
-  attackerThread <- async $ runAttacker resultChannel paceConfig  "results.txt"
+  attackerThread <- async $ runAttacker resultChannel paceConfig
   fetcherThread <- async $ runLogger resultChannel
   putStrLn $ "Attacking " ++ show (Args.target cmdFlags)
 

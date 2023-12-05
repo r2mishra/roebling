@@ -1,5 +1,7 @@
 module Attacker(
-    runAttacker
+    runAttacker,
+    AttackResult(..),
+    AttackResultMessage(..),
 )
 where
 
@@ -8,57 +10,44 @@ import Pacer
 import Control.Concurrent
 import Data.Time
 import Targeter
-import GHC.IO.Handle.FD
-import GHC.IO.IOMode
 import Control.Monad
-import GHC.IO.Handle.Text
 import Network.HTTP.Types
 import Control.Concurrent.Async
 
-writeResultsToFile :: FilePath -> [(Int, NominalDiffTime, Int)] -> IO ()
-writeResultsToFile filePath results = do
-    withFile filePath WriteMode $ \handle -> do
-        forM_ results $ \(hitCount, latency, status) ->
-            hPutStrLn handle $ "Hit: " ++ show hitCount ++ ", Latency: " ++ show latency ++ ", Status Code: " ++ show status
+data AttackResult = AttackResult {seq:: Int, code :: Int, latency :: NominalDiffTime} deriving (Show)
+data AttackResultMessage
+  = ResultMessage AttackResult
+  | StopMessage Int
+  deriving Show
 
-attacker :: Manager -> IO (NominalDiffTime, Int)
-attacker manager = do
-    print "Attacking\n"
-    let target = Target "GET" "http://localhost:8000/slow" Nothing []
+attacker :: Manager -> Int -> IO (NominalDiffTime, Int)
+attacker manager hit = do
+    let parameterized_url = "http://localhost:8000/slow/" ++ show hit
+    let target = Target "GET" parameterized_url Nothing []
     requestObj <- request target
     begin <- getCurrentTime
     response <- httpLbs requestObj manager
     end <- getCurrentTime
-    let latency = diffUTCTime end begin
-    return (latency, statusCode $ responseStatus response)
+    return (end `diffUTCTime` begin, statusCode $ responseStatus response)
 
-runAttacker :: Chan(Maybe(Int, NominalDiffTime)) -> PaceConfig -> FilePath -> IO () 
-runAttacker channel config filePath = do
+runAttacker :: Chan AttackResultMessage -> PaceConfig-> IO ()
+runAttacker channel config = do
     began <- getCurrentTime
     manager <- newManager tlsManagerSettings
-    resultList <- newMVar []
 
     let loop hitCount = do
             res <- pace began hitCount config
-            let PacerResult stop waitTime = res
-            if stop 
+            let PacerResult shouldStop shouldWaitTime = res
+            if shouldStop
                 then do
-                    results <- takeMVar resultList
-                    print results
-                    writeResultsToFile filePath results
-               else do
-                    if waitTime > 0
-                        then do
-                            print $ "Waiting for " ++ show waitTime ++ " seconds"
-                            threadDelay (floor $ waitTime * 1000000)
-                        else return ()
+                    writeChan channel $ StopMessage hitCount
+                    return ()
+            else do
+                    when (shouldWaitTime > 0) $ do
+                            threadDelay (floor $ shouldWaitTime * 1000000)
                     _ <- async $ do
-                        (latency, status) <- attacker manager 
-                        print("HitCount" ++ show hitCount ++  "Latency: " ++ show latency ++ ", Status Code: " ++ show status)
-                        results <- takeMVar resultList
-                        putMVar resultList $ results ++ [(hitCount, latency, status)]
-                        print("Senfing hitcount" ++ show hitCount ++ " to channel")
-                        writeChan channel $ Just(hitCount, latency)
+                        (atkLatency, status) <- attacker manager hitCount
+                        writeChan channel $ ResultMessage $ AttackResult hitCount status atkLatency
                     loop (hitCount + 1)
     loop 0
 

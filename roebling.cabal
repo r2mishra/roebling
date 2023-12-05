@@ -29,6 +29,7 @@ library
       Attacker
       Duration
       Lib
+      Models
       Pacer
       ResultLogger
       Targeter
