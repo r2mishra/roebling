@@ -30,7 +30,9 @@ data Flags = Flags
     resolvers :: Text,
     queryRange :: Int,
     redrawInterval :: Int,
-    target :: Text
+    target :: Text,
+    plotDemo :: Bool,
+    progressBar :: Bool
   }
   deriving (Show)
 
@@ -192,4 +194,14 @@ flags =
       str
       ( metavar "target"
           <> help "The target url to attack."
+      )
+    <*> switch
+      ( long "plotDemo"
+          -- <> short 'v' already being used by version
+          <> help "Plot a simple dummy chart for the GUI"
+      )
+    <*> switch
+      ( long "progressBar"
+          <> short 'p'
+          <> help "Show progress bar"
       )

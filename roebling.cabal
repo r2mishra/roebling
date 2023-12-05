@@ -27,12 +27,15 @@ library
   exposed-modules:
       Args
       Attacker
+      Chart
       Duration
-      Lib
       Models
       Pacer
+      ProgressBar
       ResultLogger
+      SampleData
       Targeter
+      Widgets
   other-modules:
       Paths_roebling
   autogen-modules:
@@ -44,18 +47,23 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded
   build-depends:
       aeson
+    , array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
     , http-types
+    , microlens-mtl
+    , microlens-th
     , optparse-applicative
     , parallel
     , stm
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010
 
 executable roebling-exe
@@ -71,12 +79,16 @@ executable roebling-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N2
   build-depends:
       aeson
+    , array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
     , http-types
+    , microlens-mtl
+    , microlens-th
     , optparse-applicative
     , parallel
     , roebling
@@ -84,6 +96,7 @@ executable roebling-exe
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010
 
 test-suite roebling-test
@@ -100,12 +113,16 @@ test-suite roebling-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
+    , array
     , async
     , base >=4.7 && <5
+    , brick
     , bytestring
     , containers
     , http-conduit
     , http-types
+    , microlens-mtl
+    , microlens-th
     , optparse-applicative
     , parallel
     , roebling
@@ -113,4 +130,5 @@ test-suite roebling-test
     , text
     , time
     , timeit
+    , vty
   default-language: Haskell2010
