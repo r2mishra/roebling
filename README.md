@@ -32,7 +32,7 @@ The final UI is supposed to look as follows:
 ![Ali demo](images/ali.gif)
 _GUI from [ali](https://github.com/nakabonne/ali)_
 
-Here is our current UI (work in progress):
+Here is our current UI, shown for dummy data (work in progress):
 
 ![Our ui](images/cur_progress.png)
 
