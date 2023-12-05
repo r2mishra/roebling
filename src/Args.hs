@@ -102,7 +102,7 @@ flags =
       )
     <*> switch
       ( long "version"
-          <> short 'v' 
+          <> short 'v'
           <> help "Print the current version."
       )
     <*> switch
@@ -199,10 +199,9 @@ flags =
       ( long "plotDemo"
           -- <> short 'v' already being used by version
           <> help "Plot a simple dummy chart for the GUI"
-      )    
+      )
     <*> switch
-      (
-        long "progressBar"
-        <> short 'p'
-        <> help "Show progress bar"
+      ( long "progressBar"
+          <> short 'p'
+          <> help "Show progress bar"
       )

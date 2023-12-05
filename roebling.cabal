@@ -26,11 +26,13 @@ source-repository head
 library
   exposed-modules:
       Args
+      Attacker
       Chart
       Duration
-      Lib
+      Models
       Pacer
       ProgressBar
+      ResultLogger
       SampleData
       Targeter
       Widgets
