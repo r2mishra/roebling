@@ -1,7 +1,6 @@
 module Pacer
-  ( 
-    PacerResult(..),
-    PaceConfig(..),
+  ( PacerResult (..),
+    PaceConfig (..),
     pace,
   )
 where

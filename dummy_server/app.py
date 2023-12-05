@@ -15,14 +15,14 @@ async def ping():
     print(f"Latency for /ping: {latency}")
     return result
 
-@app.get("/slow/{seq}")
-async def slow(seq: int):
+@app.get("/slow")
+async def slow():
     start_time = time.time()
     time.sleep(0.2)
     result = {"result": "pong"}
     end_time = time.time()
     latency = end_time - start_time
-    print(f"Latency for /slow: {latency} | seq: {seq}")
+    print(f"Latency for /slow: {latency}")
     return result
 
 

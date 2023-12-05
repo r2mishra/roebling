@@ -1,27 +1,38 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Main (main) where
 
 import qualified Args
-import Data.Text (unpack)
-import Lib
-import Options.Applicative
 import Attacker (runAttacker)
-import qualified Pacer
 import Control.Concurrent (newChan)
-import Data.Text.Array (run)
 import Control.Concurrent.Async
+import Data.Text (unpack)
+import Options.Applicative
+import qualified Pacer
 import ResultLogger (runLogger)
+import Targeter (Target (..))
 
 main :: IO ()
 main = do
   cmdFlags <- execParser (info (helper <*> Args.flags) fullDesc)
-  print cmdFlags
-  let paceConfig = Pacer.PaceConfig (Args.rate cmdFlags) (fromIntegral (Args.duration cmdFlags))
-  resultChannel <- newChan
-  attackerThread <- async $ runAttacker resultChannel paceConfig
-  fetcherThread <- async $ runLogger resultChannel
-  putStrLn $ "Attacking " ++ show (Args.target cmdFlags)
-
+  let targetter = buildTargetter cmdFlags
+  let pacer = buildPacer cmdFlags
+  attackChannel <- newChan
+  attackerThread <- async $ runAttacker attackChannel targetter pacer
+  fetcherThread <- async $ runLogger attackChannel
   wait attackerThread
   wait fetcherThread
+
+buildTargetter :: Args.Flags -> Target
+buildTargetter cmdFlags =
+  Target
+    { url = unpack (Args.target cmdFlags),
+      verb = Args.method cmdFlags,
+      body = Just [Args.body cmdFlags],
+      headers = [("Content-Type", "application/json")]
+    }
+
+buildPacer :: Args.Flags -> Pacer.PaceConfig
+buildPacer cmdFlags =
+  Pacer.PaceConfig
+    { Pacer.rate = Args.rate cmdFlags,
+      Pacer.duration = fromIntegral (Args.duration cmdFlags)
+    }
