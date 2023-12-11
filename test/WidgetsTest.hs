@@ -17,7 +17,7 @@ percentileTest :: HU.Assertion
 percentileTest = HU.assertEqual "Percentile" 2.5 (W.percentile 67 [1.0, 2.0, 3.0])
 
 getIntRankPercentileTest :: HU.Assertion
-getIntRankPercentileTest = HU.assertEqual "Get int rank percentile" 1.0 (W.getIntRankPercentile 0.9 [1.0, 2.0, 3.0])
+getIntRankPercentileTest = HU.assertEqual "Get int rank percentile" 2.0 (W.getIntRankPercentile 1.0 [1.0, 2.0, 3.0])
 
 getFracRankPercentileTest :: HU.Assertion
 getFracRankPercentileTest = HU.assertEqual "Get frac rank percentile" 2.0 (W.getFracRankPercentile 1.8 [1.0, 2.0, 3.0])
