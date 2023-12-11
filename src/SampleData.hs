@@ -4,6 +4,7 @@ import Chart
 import qualified Data.Map as M
 import Data.Set (fromList)
 import Data.Time
+import System.Random
 import Widgets
 
 dummyDay :: Day
@@ -20,7 +21,7 @@ mySeries :: [Integer]
 mySeries = [1 .. 20]
 
 myLatencies :: [NominalDiffTime]
-myLatencies = map fromRational [0.8, 0.7, 0.98, 0.55, 0.66]
+myLatencies = map fromRational [0.8, 0.7, 0.98, 0.55, 2]
 
 myoptions :: Options
 myoptions = MkOptions {height = 14}
@@ -49,3 +50,9 @@ myOtherStats =
       latest = dummyUTCTime,
       end = dummyUTCTime
     }
+
+generateRandomDouble :: IO Double
+generateRandomDouble = do
+  g <- newStdGen -- Create a new random number generator
+  let (value, _) = randomR (0.0, 1.0) g -- Generate a random Double between 0.0 and 1.0
+  return value
