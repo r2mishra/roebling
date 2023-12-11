@@ -59,7 +59,10 @@ library
     , microlens-th
     , optparse-applicative
     , parallel
+    , silently
     , stm
+    , tasty
+    , tasty-hunit
     , text
     , time
     , timeit
@@ -92,7 +95,10 @@ executable roebling-exe
     , optparse-applicative
     , parallel
     , roebling
+    , silently
     , stm
+    , tasty
+    , tasty-hunit
     , text
     , time
     , timeit
@@ -103,6 +109,10 @@ test-suite roebling-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      DurationTest
+      ProgressBarTest
+      ResultLoggerTest
+      WidgetsTest
       Paths_roebling
   autogen-modules:
       Paths_roebling
@@ -126,7 +136,10 @@ test-suite roebling-test
     , optparse-applicative
     , parallel
     , roebling
+    , silently
     , stm
+    , tasty
+    , tasty-hunit
     , text
     , time
     , timeit

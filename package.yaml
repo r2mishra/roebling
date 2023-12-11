@@ -38,6 +38,9 @@ dependencies:
 - microlens-mtl
 - microlens-th
 - aeson
+- tasty
+- tasty-hunit
+- silently
 
 ghc-options:
 - -Wall
