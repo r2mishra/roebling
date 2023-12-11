@@ -4,11 +4,10 @@ module ResultLoggerTest (resultLoggerTests) where
 import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Monad
-import Control.Monad.ST.Strict
 import Test.Tasty
 import Test.Tasty.HUnit
-import System.IO
 import System.IO.Silently
+import Control.Exception
 
 
 import ResultLogger
@@ -17,6 +16,7 @@ import Attacker
 
 mockChannel :: IO (Chan AttackResultMessage)
 mockChannel = newChan
+
 
 -- Test case for 'runLogger' function
 testRunLogger :: Assertion
@@ -32,15 +32,18 @@ testRunLogger = do
             "Logger ==> Will stop at Hit: 4"
           ]
 
-    
-    withAsync (runLogger chan) $ \loggerAsync -> do    
-      threadDelay 1000000
+    (outputVar, _) <- capture( withAsync (runLogger chan) $ \loggerAsync -> do    
       forM_ [0 .. 4] $ \i -> writeChan chan (ResultMessage (AttackResult i 200 1.0))
       writeChan chan (StopMessage 5)    
-      wait loggerAsync
-    capturedOutput <- takeMVar outputVar
-    assertEqual "Output matches expected" expectedOutput  capturedOutput
+      threadDelay 1000000 
+      catch (cancel loggerAsync) handler
+      )
+    -- capturedOutput <- takeMVar outputVar
+    assertEqual "Output matches expected" expectedOutput  outputVar
 
 
 resultLoggerTests :: TestTree
 resultLoggerTests = testGroup "ResultLogger Tests" [testCase "runLogger" testRunLogger]
+
+handler :: SomeException -> IO ()
+handler _ = return ()
