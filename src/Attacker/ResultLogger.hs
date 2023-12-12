@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wno-name-shadowing #-}
 
-module ResultLogger
+module Attacker.ResultLogger
   ( runLogger,
   )
 where
 
-import Attacker (AttackResult (..), AttackResultMessage (..))
+import Attacker.Attacker (AttackResult (..), AttackResultMessage (..))
 import Control.Concurrent
 
 -- Dummy file to experiment with channels

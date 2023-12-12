@@ -1,4 +1,4 @@
-module Attacker
+module Attacker.Attacker
   ( runAttacker,
     AttackResult (..),
     AttackResultMessage (..),
@@ -11,8 +11,8 @@ import Control.Monad
 import Data.Time
 import Network.HTTP.Conduit
 import Network.HTTP.Types
-import Pacer
-import Targeter
+import Attacker.Pacer
+import Attacker.Targeter
 
 data AttackResult = AttackResult {seq :: Int, code :: Int, latency :: NominalDiffTime} deriving (Show)
 

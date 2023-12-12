@@ -1,8 +1,8 @@
 {-# LANGUAGE InstanceSigs #-}
 
-module Widgets where
+module Gui.Widgets where
 
-import Attacker (AttackResult (..), AttackResultMessage (..))
+import Attacker.Attacker (AttackResult (..), AttackResultMessage (..))
 import Brick
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)

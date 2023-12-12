@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module ProgressBar where
+module Gui.ProgressBar where
 
 import Brick
 import qualified Brick.AttrMap as A

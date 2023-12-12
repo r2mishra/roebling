@@ -26,16 +26,16 @@ source-repository head
 library
   exposed-modules:
       Args
-      Attacker
-      Chart
+      Attacker.Attacker
+      Attacker.Models
+      Attacker.Pacer
+      Attacker.ResultLogger
+      Attacker.Targeter
       Duration
-      Models
-      Pacer
-      ProgressBar
-      ResultLogger
-      SampleData
-      Targeter
-      Widgets
+      Gui.Chart
+      Gui.ProgressBar
+      Gui.SampleData
+      Gui.Widgets
   other-modules:
       Paths_roebling
   autogen-modules:

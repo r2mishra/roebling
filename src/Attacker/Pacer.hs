@@ -1,4 +1,4 @@
-module Pacer
+module Attacker.Pacer
   ( PacerResult (..),
     PaceConfig (..),
     pace,

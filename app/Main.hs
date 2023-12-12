@@ -6,12 +6,12 @@ module Main (main) where
 
 import Args
 import qualified Args
-import Attacker (runAttacker)
+import Attacker.Attacker (runAttacker)
 import Brick
 import qualified Brick.Main as M
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style
-import Chart (AppState (..), Options (..), getPlotLines, plotApp)
+import Gui.Chart (AppState (..), Options (..), getPlotLines, plotApp)
 import Control.Concurrent (Chan, forkIO, newChan, readChan, threadDelay)
 import Control.Concurrent.Async
 import Control.Monad
@@ -20,18 +20,19 @@ import Data.Time (NominalDiffTime)
 import qualified Graphics.Vty as V
 import Graphics.Vty.CrossPlatform
 import Options.Applicative
-import qualified Pacer
-import ResultLogger (runLogger)
-import Targeter (Target (..))
-import qualified Widgets as W
+import qualified Attacker.Pacer as Pacer
+import Attacker.ResultLogger (runLogger)
+import Attacker.Targeter (Target (..))
+import qualified Attacker.Targeter as Targeter
+import qualified Gui.Widgets as W
 #if !(MIN_VERSION_base(4,11,0))
 import Data.Monoid
 #endif
 
 import Brick.BChan (BChan, newBChan, writeBChan)
 import qualified GHC.Conc.Sync
-import ProgressBar
-import SampleData
+import Gui.ProgressBar
+import Gui.SampleData
 
 main :: IO ()
 main = do
