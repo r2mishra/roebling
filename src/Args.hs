@@ -12,8 +12,8 @@ data Flags = Flags
     timeout :: Int,
     method :: Text,
     headers :: Map String String,
-    body :: Text,
-    bodyFile :: FilePath,
+    body :: Maybe Text,
+    bodyFile :: Maybe FilePath,
     maxBody :: Int,
     version :: Bool,
     debug :: Bool,
@@ -78,19 +78,20 @@ flags =
           <> value (Map.fromList [("User-Agent", "roebling")])
           <> showDefault
       )
-    <*> strOption
-      ( long "body"
-          <> short 'b'
-          <> help "A request body to be sent."
-          <> value ""
-          <> showDefault
+    <*> optional
+      ( strOption
+          ( long "body"
+              <> short 'b'
+              <> help "A request body to be sent."
+              <> showDefault
+          )
       )
-    <*> strOption
-      ( long "body-file"
-          <> short 'B'
-          <> help "The path to file whose content will be set as the http request body."
-          <> value ""
-          <> showDefault
+    <*> optional
+      ( strOption
+          ( long "body-file"
+              <> short 'B'
+              <> help "The path to file whose content will be set as the http request body."
+          )
       )
     <*> option
       auto

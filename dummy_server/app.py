@@ -1,7 +1,7 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+import json
 import time
-import logging
 
 app = FastAPI()
 
@@ -23,6 +23,17 @@ async def slow():
     end_time = time.time()
     latency = end_time - start_time
     print(f"Latency for /slow: {latency}")
+    return result
+
+@app.post("/post")
+async def post(request: Request):
+    start_time = time.time()
+    data = await request.json()
+    print(data)
+    result = json.dumps(data)
+    end_time = time.time()
+    latency = end_time - start_time
+    print(f"Latency for /post: {latency}")
     return result
 
 

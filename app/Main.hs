@@ -56,7 +56,8 @@ buildTargetter cmdFlags =
   Target
     { url = unpack (Args.target cmdFlags),
       verb = Args.method cmdFlags,
-      Targeter.body = Just [Args.body cmdFlags],
+      Targeter.body = Args.body cmdFlags,
+      Targeter.bodyFile = Args.bodyFile cmdFlags,
       Targeter.headers = [("Content-Type", "application/json")]
     }
 
