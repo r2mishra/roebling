@@ -38,6 +38,8 @@ dependencies:
 - microlens-mtl
 - microlens-th
 - aeson
+- vty-crossplatform
+- random
 
 ghc-options:
 - -Wall

@@ -62,8 +62,8 @@ appEvent (T.VtyEvent e) =
         _ -> return ()
 appEvent _ = return ()
 
-initialState :: MyAppState ()
-initialState = MyAppState 0.0
+initialPBState :: MyAppState ()
+initialPBState = MyAppState 0.0
 
 theBaseAttr :: A.AttrName
 theBaseAttr = A.attrName "theBase"
