@@ -4,7 +4,7 @@
 -- needed for makelenses
 {-# LANGUAGE TemplateHaskell #-}
 
-module Chart
+module GUI.Chart
   ( -- * Plot
     plotWith,
     plotWith',
@@ -32,12 +32,12 @@ import Data.Bool (bool)
 import Data.Char (isSpace)
 import Data.List (dropWhileEnd, unfoldr)
 import Data.Time (NominalDiffTime)
+import GUI.Widgets (BytesWidget)
+import qualified GUI.Widgets as W
 import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import Text.Printf (printf)
-import Widgets (BytesWidget)
-import qualified Widgets as W
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.

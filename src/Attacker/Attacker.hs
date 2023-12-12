@@ -1,25 +1,17 @@
-module Attacker
+module Attacker.Attacker
   ( runAttacker,
-    AttackResult (..),
-    AttackResultMessage (..),
   )
 where
 
+import Attacker.Pacer
+import Attacker.Targeter
 import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Monad
 import Data.Time
 import Network.HTTP.Conduit
 import Network.HTTP.Types
-import Pacer
-import Targeter
-
-data AttackResult = AttackResult {seq :: Int, code :: Int, latency :: NominalDiffTime} deriving (Show)
-
-data AttackResultMessage
-  = ResultMessage AttackResult
-  | StopMessage Int
-  deriving (Show)
+import Utils.Models
 
 attacker :: Target -> Manager -> IO (NominalDiffTime, Int)
 attacker target manager = do

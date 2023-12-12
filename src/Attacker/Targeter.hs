@@ -1,7 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Targeter where
+module Attacker.Targeter where
 
 import Data.Aeson (ToJSON, encode)
 import Data.Text (Text)

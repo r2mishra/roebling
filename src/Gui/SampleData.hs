@@ -1,11 +1,11 @@
-module SampleData where
+module GUI.SampleData where
 
-import Chart
 import qualified Data.Map as M
 import Data.Set (fromList)
 import Data.Time
+import GUI.Chart
+import GUI.Widgets
 import System.Random
-import Widgets
 
 dummyDay :: Day
 dummyDay = fromGregorian 2023 1 1 -- Year, Month, Day

@@ -1,8 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 
-module Widgets where
+module GUI.Widgets where
 
-import Attacker (AttackResult (..), AttackResultMessage (..))
 import Brick
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)
@@ -15,6 +14,7 @@ import Data.Text (Text)
 import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
+import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- | Params is the set of attack parameters
 data Params = MkParams

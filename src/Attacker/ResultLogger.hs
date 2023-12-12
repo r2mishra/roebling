@@ -1,12 +1,12 @@
 {-# OPTIONS_GHC -Wno-name-shadowing #-}
 
-module ResultLogger
+module Attacker.ResultLogger
   ( runLogger,
   )
 where
 
-import Attacker (AttackResult (..), AttackResultMessage (..))
 import Control.Concurrent
+import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- Dummy file to experiment with channels
 runLogger :: Chan AttackResultMessage -> IO ()
