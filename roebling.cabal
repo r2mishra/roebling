@@ -27,15 +27,15 @@ library
   exposed-modules:
       Args
       Attacker.Attacker
-      Attacker.Models
       Attacker.Pacer
       Attacker.ResultLogger
       Attacker.Targeter
-      Duration
-      Gui.Chart
-      Gui.ProgressBar
-      Gui.SampleData
-      Gui.Widgets
+      GUI.Chart
+      GUI.ProgressBar
+      GUI.SampleData
+      GUI.Widgets
+      Utils.Duration
+      Utils.Models
   other-modules:
       Paths_roebling
   autogen-modules:

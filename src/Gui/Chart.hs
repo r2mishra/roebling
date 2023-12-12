@@ -4,7 +4,7 @@
 -- needed for makelenses
 {-# LANGUAGE TemplateHaskell #-}
 
-module Gui.Chart
+module GUI.Chart
   ( -- * Plot
     plotWith,
     plotWith',
@@ -32,9 +32,9 @@ import Data.Bool (bool)
 import Data.Char (isSpace)
 import Data.List (dropWhileEnd, unfoldr)
 import Data.Time (NominalDiffTime)
+import GUI.Widgets (BytesWidget)
+import qualified GUI.Widgets as W
 import qualified Graphics.Vty as V
-import Gui.Widgets (BytesWidget)
-import qualified Gui.Widgets as W
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import Text.Printf (printf)

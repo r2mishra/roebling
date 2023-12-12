@@ -1,10 +1,10 @@
-module Gui.SampleData where
+module GUI.SampleData where
 
 import qualified Data.Map as M
 import Data.Set (fromList)
 import Data.Time
-import Gui.Chart
-import Gui.Widgets
+import GUI.Chart
+import GUI.Widgets
 import System.Random
 
 dummyDay :: Day

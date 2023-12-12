@@ -1,4 +1,4 @@
-module Attacker.Models (AttackResult, AttackResultMessage) where
+module Utils.Models (AttackResult (..), AttackResultMessage (..)) where
 
 import Data.Time
 

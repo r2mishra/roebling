@@ -5,8 +5,8 @@ module Attacker.ResultLogger
   )
 where
 
-import Attacker.Attacker (AttackResult (..), AttackResultMessage (..))
 import Control.Concurrent
+import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- Dummy file to experiment with channels
 runLogger :: Chan AttackResultMessage -> IO ()

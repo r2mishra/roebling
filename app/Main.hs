@@ -12,6 +12,7 @@ import Attacker.ResultLogger (runLogger)
 import Attacker.Targeter (Target (..))
 import qualified Attacker.Targeter as Targeter
 import Brick
+import Brick.BChan (BChan, newBChan, writeBChan)
 import qualified Brick.Main as M
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style
@@ -20,19 +21,17 @@ import Control.Concurrent.Async
 import Control.Monad
 import Data.Text (unpack)
 import Data.Time (NominalDiffTime)
+import qualified GHC.Conc.Sync
+import GUI.Chart (AppState (..), Options (..), getPlotLines, plotApp)
+import GUI.ProgressBar
+import GUI.SampleData
+import qualified GUI.Widgets as W
 import qualified Graphics.Vty as V
 import Graphics.Vty.CrossPlatform
-import Gui.Chart (AppState (..), Options (..), getPlotLines, plotApp)
-import qualified Gui.Widgets as W
 import Options.Applicative
 #if !(MIN_VERSION_base(4,11,0))
 import Data.Monoid
 #endif
-
-import Brick.BChan (BChan, newBChan, writeBChan)
-import qualified GHC.Conc.Sync
-import Gui.ProgressBar
-import Gui.SampleData
 
 main :: IO ()
 main = do
