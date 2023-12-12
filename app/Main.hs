@@ -7,11 +7,14 @@ module Main (main) where
 import Args
 import qualified Args
 import Attacker.Attacker (runAttacker)
+import qualified Attacker.Pacer as Pacer
+import Attacker.ResultLogger (runLogger)
+import Attacker.Targeter (Target (..))
+import qualified Attacker.Targeter as Targeter
 import Brick
 import qualified Brick.Main as M
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style
-import Gui.Chart (AppState (..), Options (..), getPlotLines, plotApp)
 import Control.Concurrent (Chan, forkIO, newChan, readChan, threadDelay)
 import Control.Concurrent.Async
 import Control.Monad
@@ -19,12 +22,9 @@ import Data.Text (unpack)
 import Data.Time (NominalDiffTime)
 import qualified Graphics.Vty as V
 import Graphics.Vty.CrossPlatform
-import Options.Applicative
-import qualified Attacker.Pacer as Pacer
-import Attacker.ResultLogger (runLogger)
-import Attacker.Targeter (Target (..))
-import qualified Attacker.Targeter as Targeter
+import Gui.Chart (AppState (..), Options (..), getPlotLines, plotApp)
 import qualified Gui.Widgets as W
+import Options.Applicative
 #if !(MIN_VERSION_base(4,11,0))
 import Data.Monoid
 #endif

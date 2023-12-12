@@ -33,11 +33,11 @@ import Data.Char (isSpace)
 import Data.List (dropWhileEnd, unfoldr)
 import Data.Time (NominalDiffTime)
 import qualified Graphics.Vty as V
+import Gui.Widgets (BytesWidget)
+import qualified Gui.Widgets as W
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import Text.Printf (printf)
-import Gui.Widgets (BytesWidget)
-import qualified Gui.Widgets as W
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.

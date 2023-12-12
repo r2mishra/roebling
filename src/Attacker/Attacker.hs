@@ -5,14 +5,14 @@ module Attacker.Attacker
   )
 where
 
+import Attacker.Pacer
+import Attacker.Targeter
 import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Monad
 import Data.Time
 import Network.HTTP.Conduit
 import Network.HTTP.Types
-import Attacker.Pacer
-import Attacker.Targeter
 
 data AttackResult = AttackResult {seq :: Int, code :: Int, latency :: NominalDiffTime} deriving (Show)
 
