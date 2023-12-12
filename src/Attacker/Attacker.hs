@@ -13,13 +13,18 @@ import Network.HTTP.Conduit
 import Network.HTTP.Types
 import Utils.Models
 
-attacker :: Target -> Manager -> IO (NominalDiffTime, Int)
-attacker target manager = do
+attacker :: Target -> Manager -> Int -> IO AttackResult
+attacker target manager hitCount = do
   requestObj <- request target
   begin <- getCurrentTime
   response <- httpLbs requestObj manager
   end <- getCurrentTime
-  return (end `diffUTCTime` begin, statusCode $ responseStatus response)
+  let status = statusCode $ responseStatus response
+      errorMessage = if status /= 200 then Just (getErrorMsg response) else Nothing
+   in return (AttackResult hitCount status (end `diffUTCTime` begin) errorMessage)
+
+getErrorMsg :: Response body -> String
+getErrorMsg response = show (statusMessage (responseStatus response))
 
 runAttacker :: Chan AttackResultMessage -> Target -> PaceConfig -> IO ()
 runAttacker channel target config = do
@@ -37,7 +42,7 @@ runAttacker channel target config = do
             when (shouldWaitTime > 0) $ do
               threadDelay (floor $ shouldWaitTime * 1000000)
             _ <- async $ do
-              (atkLatency, status) <- attacker target manager
-              writeChan channel $ ResultMessage $ AttackResult hitCount status atkLatency
+              msg <- attacker target manager hitCount
+              writeChan channel $ ResultMessage msg
             loop (hitCount + 1)
   loop 0
