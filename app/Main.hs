@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
@@ -19,6 +18,7 @@ import Brick.Widgets.Border.Style
 import Control.Concurrent (Chan, forkIO, newChan, readChan, threadDelay)
 import Control.Concurrent.Async
 import Control.Monad
+import Data.Monoid
 import Data.Text (unpack)
 import Data.Time (NominalDiffTime)
 import qualified GHC.Conc.Sync
@@ -29,9 +29,6 @@ import qualified GUI.Widgets as W
 import qualified Graphics.Vty as V
 import Graphics.Vty.CrossPlatform
 import Options.Applicative
-#if !(MIN_VERSION_base(4,11,0))
-import Data.Monoid
-#endif
 
 main :: IO ()
 main = do
@@ -54,7 +51,7 @@ main = do
 buildTargetter :: Args.Flags -> Target
 buildTargetter cmdFlags =
   Target
-    { url = unpack (Args.target cmdFlags),
+    { url = Args.target cmdFlags,
       verb = Args.method cmdFlags,
       Targeter.body = Args.body cmdFlags,
       Targeter.bodyFile = Args.bodyFile cmdFlags,

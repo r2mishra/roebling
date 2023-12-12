@@ -57,6 +57,7 @@ library
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
     , random
@@ -91,6 +92,7 @@ executable roebling-exe
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
     , random
@@ -127,6 +129,7 @@ test-suite roebling-test
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
     , random

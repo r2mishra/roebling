@@ -9,10 +9,11 @@ import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text.IO as TIO
 import Network.HTTP.Conduit (Request (method, requestBody, requestHeaders), RequestBody (RequestBodyLBS), parseRequest)
 import Network.HTTP.Simple (RequestHeaders)
+import Network.URI (URI)
 
 data Target = Target
   { verb :: Text,
-    url :: String,
+    url :: URI,
     body :: Maybe Text,
     bodyFile :: Maybe FilePath,
     headers :: RequestHeaders
@@ -28,7 +29,7 @@ instance Targeter Target where
         requestUrl = url target
         reqHeaders = headers target
     reqBody <- maybeRequestBody (body target) (bodyFile target)
-    reqBuilder <- parseRequest requestUrl
+    reqBuilder <- parseRequest (show requestUrl)
     return reqBuilder {method = encodeUtf8 requestMethod, requestBody = reqBody, requestHeaders = reqHeaders}
 
 maybeRequestBody :: Maybe Text -> Maybe FilePath -> IO RequestBody

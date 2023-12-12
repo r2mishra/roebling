@@ -4,6 +4,7 @@ module Args where
 
 import Data.Map as Map
 import Data.Text (Text)
+import Network.URI (URI, parseURI)
 import Options.Applicative
 
 data Flags = Flags
@@ -30,7 +31,7 @@ data Flags = Flags
     resolvers :: Text,
     queryRange :: Int,
     redrawInterval :: Int,
-    target :: Text,
+    target :: URI,
     plotDemo :: Bool,
     progressBar :: Bool
   }
@@ -191,11 +192,7 @@ flags =
           <> value 0
           <> showDefault
       )
-    <*> argument
-      str
-      ( metavar "target"
-          <> help "The target url to attack."
-      )
+    <*> uriParser
     <*> switch
       ( long "plotDemo"
           -- <> short 'v' already being used by version
@@ -206,3 +203,11 @@ flags =
           <> short 'p'
           <> help "Show progress bar"
       )
+
+uriParser :: Parser URI
+uriParser =
+  argument
+    (str >>= maybe (fail "Invalid URI") return . parseURI)
+    ( metavar "target"
+        <> help "The target to attack"
+    )
