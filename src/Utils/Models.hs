@@ -1,4 +1,4 @@
-module Utils.Models (AttackResult (..), AttackResultMessage (..), Target (..), PaceConfig(..), PacerResult(..)) where
+module Utils.Models (AttackResult (..), AttackResultMessage (..), Target (..), PaceConfig (..), PacerResult (..)) where
 
 import Data.Text
 import Data.Time

@@ -6,7 +6,7 @@ module Attacker.Pacer
 where
 
 import Data.Time
-import Utils.Models ( PacerResult(..), PaceConfig(..) )
+import Utils.Models (PaceConfig (..), PacerResult (..))
 
 pace :: UTCTime -> Int -> PaceConfig -> IO PacerResult
 pace began hitCount config = do

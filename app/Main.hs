@@ -8,7 +8,6 @@ import qualified Args
 import Attacker.Attacker (runAttacker)
 import qualified Attacker.Pacer as Pacer
 import Attacker.ResultLogger (runLogger)
-import Attacker.Targeter (Target (..))
 import qualified Attacker.Targeter as Targeter
 import Brick
 import Brick.BChan (BChan, newBChan, writeBChan)
@@ -29,6 +28,7 @@ import qualified GUI.Widgets as W
 import qualified Graphics.Vty as V
 import Graphics.Vty.CrossPlatform
 import Options.Applicative
+import qualified Utils.Models as Models
 
 main :: IO ()
 main = do
@@ -48,14 +48,14 @@ main = do
   wait attackerThread
   wait fetcherThread
 
-buildTargetter :: Args.Flags -> Target
+buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =
-  Target
-    { url = Args.target cmdFlags,
-      verb = Args.method cmdFlags,
-      Targeter.body = Args.body cmdFlags,
-      Targeter.bodyFile = Args.bodyFile cmdFlags,
-      Targeter.headers = [("Content-Type", "application/json")]
+  Models.Target
+    { Models.url = Args.target cmdFlags,
+      Models.verb = Args.method cmdFlags,
+      Models.body = Args.body cmdFlags,
+      Models.bodyFile = Args.bodyFile cmdFlags,
+      Models.headers = [("Content-Type", "application/json")]
     }
 
 buildPacer :: Args.Flags -> Pacer.PaceConfig
