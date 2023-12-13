@@ -9,6 +9,7 @@ import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text.IO as TIO
 import Network.HTTP.Conduit (Request (method, requestBody, requestHeaders), RequestBody (RequestBodyLBS), parseRequest)
 import Utils.Models (Target (body, bodyFile, headers, url, verb))
+import System.Directory (doesFileExist)
 
 class Targeter a where
   request :: a -> IO Request
@@ -35,5 +36,9 @@ setRequestBodyJSON = RequestBodyLBS . encode
 
 readFileToString :: FilePath -> IO String
 readFileToString filePath = do
-  content <- TIO.readFile filePath
-  return (show content)
+  fileExists <- doesFileExist filePath
+  if fileExists
+    then do
+      content <- TIO.readFile filePath
+      return (show content)
+    else error "Invalid file path."

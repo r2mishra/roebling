@@ -41,6 +41,7 @@ dependencies:
 - vty-crossplatform
 - random
 - network-uri
+- directory
 
 ghc-options:
 - -Wall
