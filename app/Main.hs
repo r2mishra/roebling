@@ -1,32 +1,24 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Main (main) where
 
 import Args
-import qualified Args
 import Attacker.Attacker (runAttacker)
 import qualified Attacker.Pacer as Pacer
 import Attacker.ResultLogger (runLogger)
-import qualified Attacker.Targeter as Targeter
-import Brick
 import Brick.BChan (BChan, newBChan, writeBChan)
 import qualified Brick.Main as M
-import Brick.Widgets.Border
-import Brick.Widgets.Border.Style
-import Control.Concurrent (Chan, forkIO, newChan, readChan, threadDelay)
+import Control.Concurrent (forkIO)
 import Control.Concurrent.Async
+import Control.Concurrent.Chan (newChan)
 import Control.Monad
-import Data.Monoid
-import Data.Text (unpack)
 import Data.Time (NominalDiffTime)
+import GHC.Conc.IO (threadDelay)
 import qualified GHC.Conc.Sync
-import GUI.Chart (AppState (..), Options (..), getPlotLines, plotApp)
+import GUI.Chart
 import GUI.ProgressBar
 import GUI.SampleData
 import qualified GUI.Widgets as W
-import qualified Graphics.Vty as V
-import Graphics.Vty.CrossPlatform
 import Options.Applicative
 import qualified Utils.Models as Models
 

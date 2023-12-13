@@ -3,3 +3,4 @@
 .vscode/
 **/__pycache__/
 dist-newstyle/
+.DS_Store

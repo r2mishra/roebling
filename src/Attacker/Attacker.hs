@@ -13,9 +13,8 @@ import Network.HTTP.Conduit
 import Network.HTTP.Types
 import Utils.Models
 
-attacker :: Target -> Manager -> Int -> IO AttackResult
-attacker target manager hitCount = do
-  requestObj <- request target
+attacker :: Request -> Manager -> Int -> IO AttackResult
+attacker requestObj manager hitCount = do
   begin <- getCurrentTime
   response <- httpLbs requestObj manager
   end <- getCurrentTime
@@ -30,6 +29,7 @@ runAttacker :: Chan AttackResultMessage -> Target -> PaceConfig -> IO ()
 runAttacker channel target config = do
   began <- getCurrentTime
   manager <- newManager tlsManagerSettings
+  targetRequest <- request target
 
   let loop hitCount = do
         res <- pace began hitCount config
@@ -41,7 +41,7 @@ runAttacker channel target config = do
             when (shouldWaitTime > 0) $ do
               threadDelay (floor $ shouldWaitTime * 1000000)
             _ <- async $ do
-              msg <- attacker target manager hitCount
+              msg <- attacker targetRequest manager hitCount
               writeChan channel $ ResultMessage msg
             loop (hitCount + 1)
   loop 0
