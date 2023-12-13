@@ -18,3 +18,6 @@ dev:
 
 fmt:
 	find . -name '*.hs' | xargs ormolu --mode inplace
+
+runtest:
+	cabal test --test-show-details=always

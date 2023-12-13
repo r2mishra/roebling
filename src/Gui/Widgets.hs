@@ -19,10 +19,15 @@ import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- | Params is the set of attack parameters
 data Params = MkParams
-  { target :: URI, -- target endpoint
-    rate :: Int, -- request rate per second
-    duration :: Int, -- duration in seconds
-    method :: Text -- HTTP request type (GET, etc)
+  { 
+    -- | target endpoint
+    target :: URI,
+    -- | request rate per second
+    rate :: Int, 
+    -- | duration in seconds
+    duration :: Int, 
+     -- | HTTP request type (GET, etc)
+    method :: Text
   }
 
 -- TODO: Add centering to make sure latency plot occupies the full width
@@ -35,43 +40,48 @@ drawLatencyStats latencies =
 formatStats :: [NominalDiffTime] -> String
 formatStats latencies =
   unlines
-    [ "Total: " ++ show total,
-      "Mean: " ++ show mean,
+    [ "Total: " ++ show totalL,
+      "Mean: " ++ show meanL,
       "P50: " ++ show p50,
       "P90: " ++ show p90,
       "P95: " ++ show p95,
       "P99: " ++ show p99,
-      "Max: " ++ show max,
-      "Min: " ++ show min
+      "Max: " ++ show maxL,
+      "Min: " ++ show minL
     ]
   where
+    (totalL, meanL, p50, p90, p95, p99, maxL, minL) = getLatencyStats latencies
+
+getLatencyStats :: [NominalDiffTime] -> (Double, Double, Double, Double, Double, Double, Double, Double)
+getLatencyStats latencies = (totalL, meanL, p50, p90, p95, p99, maxL, minL)
+  where
     floatLats = map realToFrac latencies :: [Double]
-    total = sum floatLats
+    totalL = sum floatLats
     count = fromIntegral $ length floatLats
-    mean = total / count
+    meanL = totalL / count
     sortedList = sort floatLats
     p50 = percentile 50 sortedList
     p90 = percentile 90 sortedList
     p95 = percentile 95 sortedList
     p99 = percentile 99 sortedList
-    max = sortedList !! (length sortedList - 1)
-    min = head sortedList
+    maxL = sortedList !! (length sortedList - 1)
+    minL = head sortedList
 
 percentile :: Int -> [Double] -> Double
 percentile p xs = go p xs
   where
     go p xs =
       if r == fromIntegral (floor r :: Int)
-        then getIntRankPercentile r xs
+        then getIntRankPercentile (floor r) xs
         else getFracRankPercentile r xs
     r :: Double
-    r = ((fromIntegral p) / 100.0) * fromIntegral (length xs - 1)
+    r = (fromIntegral p / 100.0) * fromIntegral (length xs - 1)
 
-getIntRankPercentile :: Double -> [Double] -> Double
-getIntRankPercentile r xs = xs !! floor r
+getIntRankPercentile :: Int -> [Double] -> Double
+getIntRankPercentile r xs = xs !! r
 
 getFracRankPercentile :: Double -> [Double] -> Double
-getFracRankPercentile r xs = xs !! floor r + 0.5 * (xs !! (floor r + 1) - xs !! round r)
+getFracRankPercentile r xs = xs !! floor r + 0.5 * (xs !! (floor r + 1) - xs !! floor r)
 
 instance Show Params where
   show :: Params -> String
@@ -90,8 +100,8 @@ drawParams p =
       Brick.str (show p)
 
 data BytesMetrics = MkBytesMetrics
-  { total :: Int,
-    mean :: Double
+  { totalB :: Int,
+    meanB :: Double
   }
 
 data BytesWidget = MkBytesWidget
@@ -104,11 +114,11 @@ instance Show BytesWidget where
   show b =
     unlines
       [ "In:",
-        "  Total: " ++ show (total $ inMetrics b),
-        "  Mean: " ++ show (mean $ inMetrics b),
+        "  Total: " ++ show (totalB $ inMetrics b),
+        "  Mean: " ++ show (meanB $ inMetrics b),
         "Out:",
-        "  Total: " ++ show (total $ outMetrics b),
-        "  Mean: " ++ show (mean $ outMetrics b)
+        "  Total: " ++ show (totalB $ outMetrics b),
+        "  Mean: " ++ show (meanB $ outMetrics b)
       ]
 
 drawBytes :: BytesWidget -> Widget ()
