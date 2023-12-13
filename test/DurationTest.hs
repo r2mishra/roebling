@@ -2,7 +2,7 @@ module DurationTest (durationTests) where
 
 import Test.Tasty
 import qualified Test.Tasty.HUnit as HU
-import qualified Duration as D
+import qualified Utils.Duration as D
 
 durationTests :: TestTree
 durationTests =

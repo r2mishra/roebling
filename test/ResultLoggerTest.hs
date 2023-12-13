@@ -10,11 +10,11 @@ import System.IO.Silently
 import Control.Exception
 
 
-import ResultLogger
-import Attacker
+import qualified Attacker.Attacker as A
+import qualified Attacker.ResultLogger as R
+import qualified Utils.Models as M
 
-
-mockChannel :: IO (Chan AttackResultMessage)
+mockChannel :: IO (Chan M.AttackResultMessage)
 mockChannel = newChan
 
 
@@ -32,9 +32,9 @@ testRunLogger = do
             "Logger ==> Will stop at Hit: 4"
           ]
 
-    (outputVar, _) <- capture( withAsync (runLogger chan) $ \loggerAsync -> do    
-      forM_ [0 .. 4] $ \i -> writeChan chan (ResultMessage (AttackResult i 200 1.0))
-      writeChan chan (StopMessage 5)    
+    (outputVar, _) <- capture( withAsync (R.runLogger chan) $ \loggerAsync -> do    
+      forM_ [0 .. 4] $ \i -> writeChan chan (M.ResultMessage (M.AttackResult i 200 1.0))
+      writeChan chan (M.StopMessage 5)    
       threadDelay 1000000 
       catch (cancel loggerAsync) handler
       )

@@ -3,7 +3,7 @@ module WidgetsTest(tests) where
 import qualified Test.Tasty as T
 import qualified Test.Tasty.HUnit as HU
 
-import qualified Widgets as W
+import qualified GUI.Widgets as W
 
 
 tests :: T.TestTree
