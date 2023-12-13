@@ -8,8 +8,8 @@ import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text.IO as TIO
 import Network.HTTP.Conduit (Request (method, requestBody, requestHeaders), RequestBody (RequestBodyLBS), parseRequest)
-import Utils.Models (Target (body, bodyFile, headers, url, verb))
 import System.Directory (doesFileExist)
+import Utils.Models (Target (body, bodyFile, headers, url, verb))
 
 class Targeter a where
   request :: a -> IO Request

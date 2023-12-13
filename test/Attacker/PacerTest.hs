@@ -1,21 +1,21 @@
-
 module Attacker.PacerTest where
 
-
-import Test.Tasty
-import Test.Tasty.HUnit
 import Attacker.Pacer
 import Data.Time.Clock
+import Test.Tasty
+import Test.Tasty.HUnit
 
 tests :: TestTree
 tests = testGroup "Tests" [unitTests]
 
 unitTests :: TestTree
-unitTests = testGroup "Unit tests"
-  [ testCase "Pace should stop when duration is exceeded" testPaceStop
-  , testCase "Pace should not stop when hitCount is less than expectedHits" testPaceContinue
-  , testCase "Pace should calculate correct waitTime when hitCount is not less than expectedHits" testPaceWaitTime
-  ]
+unitTests =
+  testGroup
+    "Unit tests"
+    [ testCase "Pace should stop when duration is exceeded" testPaceStop,
+      testCase "Pace should not stop when hitCount is less than expectedHits" testPaceContinue,
+      testCase "Pace should calculate correct waitTime when hitCount is not less than expectedHits" testPaceWaitTime
+    ]
 
 testPaceStop :: Assertion
 testPaceStop = do

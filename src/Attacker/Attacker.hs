@@ -36,7 +36,6 @@ runAttacker channel target config = do
         let PacerResult shouldStop shouldWaitTime = res
         if shouldStop
           then do
-            writeChan channel $ StopMessage hitCount
             return ()
           else do
             when (shouldWaitTime > 0) $ do

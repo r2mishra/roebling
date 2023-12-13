@@ -6,24 +6,18 @@ module Attacker.ResultLogger
 where
 
 import Control.Concurrent
+import qualified Control.Monad
+import Data.Maybe
+import System.Timeout
 import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- Dummy file to experiment with channels
 runLogger :: Chan AttackResultMessage -> IO ()
-runLogger channel = do
- loop Nothing 0 
- where
-   loop :: Maybe Int -> Int -> IO ()
-   loop msg totHits = do
-     res <- readChan channel
-     case res of
-       StopMessage hitCount -> do
-         print $ "Logger ==> Will stop when totHits reaches: " ++ show hitCount
-         loop (Just (hitCount - 1)) totHits
-       ResultMessage (AttackResult hitCount code latency error) -> do
-         if totHits /= hitCount + 1
-           then do
-             print $ "Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency ++ ", Error: " ++ show error
-             loop msg (totHits + 1)
-           else do
-             return ()
+runLogger channel = loop
+  where
+    loop = do
+      maybeMsg <- timeout (5 * 1000000) (readChan channel) -- 5 seconds timeout (microseconds)
+      Control.Monad.when (isJust maybeMsg) $ do
+        let ResultMessage (AttackResult hitCount code latency error) = fromJust maybeMsg
+        print $ "Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency ++ ", Error: " ++ show error
+        loop

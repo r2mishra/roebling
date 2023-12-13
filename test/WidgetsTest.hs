@@ -1,16 +1,16 @@
-module WidgetsTest(tests) where
+module WidgetsTest (tests) where
 
+import qualified GUI.Widgets as W
 import qualified Test.Tasty as T
 import qualified Test.Tasty.HUnit as HU
 
-import qualified GUI.Widgets as W
-
-
 tests :: T.TestTree
-tests = T.testGroup "Widgets Tests" [
-    HU.testCase "Percentile" percentileTest,
-    HU.testCase "Get int rank percentile" getIntRankPercentileTest,
-    HU.testCase "Get frac rank percentile" getFracRankPercentileTest
+tests =
+  T.testGroup
+    "Widgets Tests"
+    [ HU.testCase "Percentile" percentileTest,
+      HU.testCase "Get int rank percentile" getIntRankPercentileTest,
+      HU.testCase "Get frac rank percentile" getFracRankPercentileTest
     ]
 
 percentileTest :: HU.Assertion
