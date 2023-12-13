@@ -44,3 +44,11 @@ The full set of commands is available as a shorthand via the Makefile. Once you 
 make single # start fastapi server, if not already started
 make dev
 ```
+
+
+# Run tests
+
+To run package tests, use the `runtest` shorthand:
+```
+make runtest
+```
