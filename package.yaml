@@ -41,6 +41,8 @@ dependencies:
 - tasty
 - tasty-hunit
 - silently
+- vty-crossplatform
+- random
 
 ghc-options:
 - -Wall

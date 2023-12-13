@@ -1,11 +1,12 @@
 {-# LANGUAGE InstanceSigs #-}
 
-module Widgets where
+module GUI.Widgets where
 
 import Brick
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)
 import qualified Brick.Widgets.Border.Style as BS
+import Control.Concurrent (Chan, readChan)
 import Data.List (sort)
 import qualified Data.Map as M
 import Data.Set (Set, toList)
@@ -13,6 +14,7 @@ import Data.Text (Text)
 import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
+import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- | Params is the set of attack parameters
 data Params = MkParams
@@ -22,6 +24,7 @@ data Params = MkParams
     method :: Text -- HTTP request type (GET, etc)
   }
 
+-- TODO: Add centering to make sure latency plot occupies the full width
 drawLatencyStats :: [NominalDiffTime] -> Widget ()
 drawLatencyStats latencies =
   withBorderStyle unicode $
@@ -184,3 +187,22 @@ drawErrors e =
   withBorderStyle unicode $
     borderWithLabel (str "Errors") $
       Brick.str (show e)
+
+-- updatePlot :: Chan AttackResultMessage -> IO ()
+-- updatePlot channel = do
+--   loop Nothing
+--   where
+--     loop msg = do
+--       res <- readChan channel
+--       case res of
+--         StopMessage hitCount -> do
+--           -- print $ "Logger ==> Will stop at Hit: " ++ show hitCount
+--           loop $ Just (hitCount - 1)
+--         ResultMessage (AttackResult hitCount code latency) -> do
+--           if msg /= Just (hitCount + 1)
+--             then do
+--               -- print $ "Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency
+
+--               loop msg
+--             else do
+--               return ()
