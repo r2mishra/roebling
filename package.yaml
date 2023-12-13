@@ -40,6 +40,8 @@ dependencies:
 - aeson
 - vty-crossplatform
 - random
+- tasty 
+- tasty-hunit
 
 ghc-options:
 - -Wall

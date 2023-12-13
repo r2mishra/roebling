@@ -1,2 +1,10 @@
+module Main where
+
+import Test.Tasty
+import qualified Attacker.PacerTest as PacerTest
+
+tests:: TestTree
+tests = testGroup "Tests" [PacerTest.tests]
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = defaultMain tests
