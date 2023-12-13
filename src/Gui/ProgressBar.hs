@@ -6,24 +6,9 @@ module GUI.ProgressBar where
 
 import Brick
 import qualified Brick.AttrMap as A
-import qualified Brick.Main as M
-import Brick.Types
-  ( Widget,
-  )
 import qualified Brick.Types as T
-import Brick.Util (bg, clamp, fg, on)
-import Brick.Widgets.Border
-import Brick.Widgets.Border.Style
-import Brick.Widgets.Core
-  ( overrideAttr,
-    str,
-    updateAttrMap,
-    (<+>),
-    (<=>),
-  )
+import qualified Brick.Main as M
 import qualified Brick.Widgets.ProgressBar as P
-import Control.Monad
-import Control.Monad (void)
 import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH

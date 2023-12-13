@@ -27,4 +27,3 @@ runLogger channel = do
              loop msg (totHits + 1)
            else do
              return ()
-

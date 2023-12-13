@@ -6,10 +6,7 @@ module Attacker.Pacer
 where
 
 import Data.Time
-
-data PaceConfig = PaceConfig {rate :: Int, duration :: NominalDiffTime} deriving (Show)
-
-data PacerResult = PacerResult {stop :: Bool, waitTime :: NominalDiffTime} deriving (Show)
+import Utils.Models (PaceConfig (..), PacerResult (..))
 
 pace :: UTCTime -> Int -> PaceConfig -> IO PacerResult
 pace began hitCount config = do
@@ -19,9 +16,9 @@ pace began hitCount config = do
   if elapsed >= duration config
     then return PacerResult {stop = True, waitTime = 0}
     else do
-      let expectedHits = (fromIntegral (rate config) * elapsed)
-      if (fromIntegral hitCount) < expectedHits
+      let expectedHits = fromIntegral (rate config) * elapsed
+      if fromIntegral hitCount < expectedHits
         then return PacerResult {stop = False, waitTime = 0}
         else do
-          let sleepTime = (fromIntegral (hitCount + 1) - expectedHits)
+          let sleepTime = fromIntegral (hitCount + 1) - expectedHits
           return PacerResult {stop = False, waitTime = sleepTime}

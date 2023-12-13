@@ -1,0 +1,25 @@
+{
+    "name": "John Doe",
+    "age": 30,
+    "isStudent": false,
+    "grades": [85, 92, 78, 95],
+    "address": {
+      "street": "123 Main St",
+      "city": "Anytown",
+      "state": "CA",
+      "zipCode": "12345"
+    },
+    "courses": [
+      {
+        "courseName": "Introduction to Computer Science",
+        "instructor": "Prof. Smith",
+        "credits": 3
+      },
+      {
+        "courseName": "Linear Algebra",
+        "instructor": "Prof. Johnson",
+        "credits": 4
+      }
+    ]
+  }
+  

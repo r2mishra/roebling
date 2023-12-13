@@ -53,14 +53,19 @@ library
     , brick
     , bytestring
     , containers
+    , directory
     , http-conduit
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
+    , silently
     , random
     , stm
+    , tasty
+    , tasty-hunit
     , text
     , time
     , timeit
@@ -87,15 +92,20 @@ executable roebling-exe
     , brick
     , bytestring
     , containers
+    , directory
     , http-conduit
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
     , random
     , roebling
+    , silently
     , stm
+    , tasty
+    , tasty-hunit
     , text
     , time
     , timeit
@@ -107,6 +117,10 @@ test-suite roebling-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      DurationTest
+      ProgressBarTest
+      ResultLoggerTest
+      WidgetsTest
       Paths_roebling
   autogen-modules:
       Paths_roebling
@@ -123,15 +137,20 @@ test-suite roebling-test
     , brick
     , bytestring
     , containers
+    , directory
     , http-conduit
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
     , random
     , roebling
+    , silently
     , stm
+    , tasty
+    , tasty-hunit
     , text
     , time
     , timeit
