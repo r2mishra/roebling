@@ -29,8 +29,8 @@ myoptions = MkOptions {height = 14}
 myBytes :: BytesWidget
 myBytes =
   MkBytesWidget
-    { inMetrics = MkBytesMetrics {total = 1, mean = 1.0},
-      outMetrics = MkBytesMetrics {total = 1, mean = 1.0}
+    { inMetrics = MkBytesMetrics {totalB = 1, meanB = 1.0},
+      outMetrics = MkBytesMetrics {totalB = 1, meanB = 1.0}
     }
 
 myErrors :: Errors
