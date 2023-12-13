@@ -7,10 +7,7 @@ import Network.URI (URI)
 
 data AttackResult = AttackResult {seq :: Int, code :: Int, latency :: NominalDiffTime, error :: Maybe String} deriving (Show)
 
-data AttackResultMessage
-  = ResultMessage AttackResult
-  | StopMessage Int
-  deriving (Show)
+data AttackResultMessage = ResultMessage AttackResult deriving (Show)
 
 data Target = Target
   { verb :: Text,
