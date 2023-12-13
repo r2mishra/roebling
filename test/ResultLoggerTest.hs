@@ -33,7 +33,7 @@ testRunLogger = do
           ]
 
     (outputVar, _) <- capture( withAsync (R.runLogger chan) $ \loggerAsync -> do    
-      forM_ [0 .. 4] $ \i -> writeChan chan (M.ResultMessage (M.AttackResult i 200 1.0))
+      forM_ [0 .. 4] $ \i -> writeChan chan (M.ResultMessage (M.AttackResult i 200 1.0 Nothing))
       writeChan chan (M.StopMessage 5)    
       threadDelay 1000000 
       catch (cancel loggerAsync) handler

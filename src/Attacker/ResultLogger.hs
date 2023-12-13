@@ -20,10 +20,10 @@ runLogger channel = do
        StopMessage hitCount -> do
          print $ "Logger ==> Will stop when totHits reaches: " ++ show hitCount
          loop (Just (hitCount - 1)) totHits
-       ResultMessage (AttackResult hitCount code latency) -> do
+       ResultMessage (AttackResult hitCount code latency error) -> do
          if totHits /= hitCount + 1
            then do
-             print $ "Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency
+             print $ "Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency ++ ", Error: " ++ show error
              loop msg (totHits + 1)
            else do
              return ()
