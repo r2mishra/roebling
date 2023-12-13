@@ -19,14 +19,13 @@ import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- | Params is the set of attack parameters
 data Params = MkParams
-  { 
-    -- | target endpoint
+  { -- | target endpoint
     target :: URI,
     -- | request rate per second
-    rate :: Int, 
+    rate :: Int,
     -- | duration in seconds
-    duration :: Int, 
-     -- | HTTP request type (GET, etc)
+    duration :: Int,
+    -- | HTTP request type (GET, etc)
     method :: Text
   }
 

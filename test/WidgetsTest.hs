@@ -26,20 +26,21 @@ getFracRankPercentileTest :: HU.Assertion
 getFracRankPercentileTest = HU.assertEqual "Get frac rank percentile" 2.5 (W.getFracRankPercentile 1.8 [1.0, 2.0, 3.0])
 
 latencyTests :: T.TestTree
-latencyTests = T.testGroup "Latency Tests" [
-        HU.testCase "Latency statistics 1" latencyStatsTest1,
-        HU.testCase "Latency statistics 2" latencyStatsTest2
+latencyTests =
+  T.testGroup
+    "Latency Tests"
+    [ HU.testCase "Latency statistics 1" latencyStatsTest1,
+      HU.testCase "Latency statistics 2" latencyStatsTest2
     ]
 
 latencyStatsTest1 :: HU.Assertion
 latencyStatsTest1 = HU.assertEqual "latency statistics1" expected_ans (W.getLatencyStats input)
-    where 
-        expected_ans = (280, 56.0, 50.0, 90.0, 90.0, 90.0, 100, 10) -- total, mean, p50, p90, p95, p99, max, min
-        input = map fromRational [100, 10, 80, 50, 40]
+  where
+    expected_ans = (280, 56.0, 50.0, 90.0, 90.0, 90.0, 100, 10) -- total, mean, p50, p90, p95, p99, max, min
+    input = map fromRational [100, 10, 80, 50, 40]
 
 latencyStatsTest2 :: HU.Assertion
 latencyStatsTest2 = HU.assertEqual "latency statistics2" expected_ans (W.getLatencyStats input)
-    where 
-        expected_ans = (240, 40, 40, 40, 40, 40, 40, 40) -- total, mean, p50, p90, p95, p99, max, min
-        input = map fromRational [40, 40, 40, 40, 40, 40]
-    
+  where
+    expected_ans = (240, 40, 40, 40, 40, 40, 40, 40) -- total, mean, p50, p90, p95, p99, max, min
+    input = map fromRational [40, 40, 40, 40, 40, 40]
