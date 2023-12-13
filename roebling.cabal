@@ -53,10 +53,12 @@ library
     , brick
     , bytestring
     , containers
+    , directory
     , http-conduit
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
     , silently
@@ -90,10 +92,12 @@ executable roebling-exe
     , brick
     , bytestring
     , containers
+    , directory
     , http-conduit
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
     , random
@@ -133,10 +137,12 @@ test-suite roebling-test
     , brick
     , bytestring
     , containers
+    , directory
     , http-conduit
     , http-types
     , microlens-mtl
     , microlens-th
+    , network-uri
     , optparse-applicative
     , parallel
     , random

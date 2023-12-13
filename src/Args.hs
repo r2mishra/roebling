@@ -4,6 +4,7 @@ module Args where
 
 import Data.Map as Map
 import Data.Text (Text)
+import Network.URI (URI, parseURI)
 import Options.Applicative
 
 data Flags = Flags
@@ -12,8 +13,8 @@ data Flags = Flags
     timeout :: Int,
     method :: Text,
     headers :: Map String String,
-    body :: Text,
-    bodyFile :: FilePath,
+    body :: Maybe Text,
+    bodyFile :: Maybe FilePath,
     maxBody :: Int,
     version :: Bool,
     debug :: Bool,
@@ -30,7 +31,7 @@ data Flags = Flags
     resolvers :: Text,
     queryRange :: Int,
     redrawInterval :: Int,
-    target :: Text,
+    target :: URI,
     plotDemo :: Bool,
     progressBar :: Bool
   }
@@ -78,19 +79,20 @@ flags =
           <> value (Map.fromList [("User-Agent", "roebling")])
           <> showDefault
       )
-    <*> strOption
-      ( long "body"
-          <> short 'b'
-          <> help "A request body to be sent."
-          <> value ""
-          <> showDefault
+    <*> optional
+      ( strOption
+          ( long "body"
+              <> short 'b'
+              <> help "A request body to be sent."
+              <> showDefault
+          )
       )
-    <*> strOption
-      ( long "body-file"
-          <> short 'B'
-          <> help "The path to file whose content will be set as the http request body."
-          <> value ""
-          <> showDefault
+    <*> optional
+      ( strOption
+          ( long "body-file"
+              <> short 'B'
+              <> help "The path to file whose content will be set as the http request body."
+          )
       )
     <*> option
       auto
@@ -190,11 +192,7 @@ flags =
           <> value 0
           <> showDefault
       )
-    <*> argument
-      str
-      ( metavar "target"
-          <> help "The target url to attack."
-      )
+    <*> uriParser
     <*> switch
       ( long "plotDemo"
           -- <> short 'v' already being used by version
@@ -205,3 +203,11 @@ flags =
           <> short 'p'
           <> help "Show progress bar"
       )
+
+uriParser :: Parser URI
+uriParser =
+  argument
+    (str >>= maybe (fail "Invalid URI") return . parseURI)
+    ( metavar "target"
+        <> help "The target to attack"
+    )

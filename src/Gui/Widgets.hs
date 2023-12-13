@@ -14,11 +14,12 @@ import Data.Text (Text)
 import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
+import Network.URI (URI)
 import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- | Params is the set of attack parameters
 data Params = MkParams
-  { target :: Text, -- target endpoint
+  { target :: URI, -- target endpoint
     rate :: Int, -- request rate per second
     duration :: Int, -- duration in seconds
     method :: Text -- HTTP request type (GET, etc)

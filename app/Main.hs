@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
@@ -9,7 +8,6 @@ import qualified Args
 import Attacker.Attacker (runAttacker)
 import qualified Attacker.Pacer as Pacer
 import Attacker.ResultLogger (runLogger)
-import Attacker.Targeter (Target (..))
 import qualified Attacker.Targeter as Targeter
 import Brick
 import Brick.BChan (BChan, newBChan, writeBChan)
@@ -19,6 +17,7 @@ import Brick.Widgets.Border.Style
 import Control.Concurrent (Chan, forkIO, newChan, readChan, threadDelay)
 import Control.Concurrent.Async
 import Control.Monad
+import Data.Monoid
 import Data.Text (unpack)
 import Data.Time (NominalDiffTime)
 import qualified GHC.Conc.Sync
@@ -29,9 +28,7 @@ import qualified GUI.Widgets as W
 import qualified Graphics.Vty as V
 import Graphics.Vty.CrossPlatform
 import Options.Applicative
-#if !(MIN_VERSION_base(4,11,0))
-import Data.Monoid
-#endif
+import qualified Utils.Models as Models
 
 main :: IO ()
 main = do
@@ -51,13 +48,14 @@ main = do
   wait attackerThread
   wait fetcherThread
 
-buildTargetter :: Args.Flags -> Target
+buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =
-  Target
-    { url = unpack (Args.target cmdFlags),
-      verb = Args.method cmdFlags,
-      Targeter.body = Just [Args.body cmdFlags],
-      Targeter.headers = [("Content-Type", "application/json")]
+  Models.Target
+    { Models.url = Args.target cmdFlags,
+      Models.verb = Args.method cmdFlags,
+      Models.body = Args.body cmdFlags,
+      Models.bodyFile = Args.bodyFile cmdFlags,
+      Models.headers = [("Content-Type", "application/json")]
     }
 
 buildPacer :: Args.Flags -> Pacer.PaceConfig
