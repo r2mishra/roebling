@@ -34,19 +34,18 @@ main :: IO ()
 main = do
   cmdFlags <- execParser (info (helper <*> Args.flags) fullDesc)
   -- TODO: plotting is still sequential, uses only dummy data
-  when (plotDemo cmdFlags) $ initializeAndRunPlot cmdFlags
-
-  -- when (progressBar cmdFlags) $ do
-  --   void $ M.defaultMain theApp initialPBState
 
   let targetter = buildTargetter cmdFlags
   let pacer = buildPacer cmdFlags
   attackChannel <- newChan
   attackerThread <- async $ runAttacker attackChannel targetter pacer
-  fetcherThread <- async $ runLogger attackChannel
-  -- graphThread <- async $ updatePlot attackChannel
+  -- fetcherThread <- async $ runLogger attackChannel
+
+  initializeAndRunPlot cmdFlags attackChannel
   wait attackerThread
-  wait fetcherThread
+  -- wait fetcherThread
+
+
 
 buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =
@@ -67,8 +66,8 @@ buildPacer cmdFlags =
 
 -- Implement the logic to read from the channel and update the graph
 -- Currently, this uses dummy data, can be extended to use data from the attacker
-initializeAndRunPlot :: Flags -> IO ()
-initializeAndRunPlot cmdFlags = do
+initializeAndRunPlot :: Flags -> Chan Models.AttackResultMessage -> IO ()
+initializeAndRunPlot cmdFlags chan = do
   let params =
         W.MkParams
           { W.target = target cmdFlags,
@@ -89,13 +88,21 @@ initializeAndRunPlot cmdFlags = do
             _otherstats = myOtherStats,
             _numDone = 0,
             _hitCount = 0,
-            _pbState = W.initialPBState
+            _pbState = 0.0
           }
-  chan <- newBChan 10
+  bchan <- newBChan 100
   -- updates latencies in a new thread
-  _ <- sendLatencies myLatencies chan
+  _ <- forkIO $ chanToBChanAdapter chan bchan
   -- TODO: this can be run in it's own thread as well.
-  void $ M.customMainWithDefaultVty (Just chan) plotApp initialState
+  void $ M.customMainWithDefaultVty (Just bchan) plotApp initialState
+
+chanToBChanAdapter :: Chan Models.AttackResultMessage -> BChan Models.AttackResultMessage -> IO ()
+chanToBChanAdapter inputChan outputBChan = loop
+  where
+    loop = do
+      message <- readChan inputChan
+      writeBChan outputBChan message
+      loop
 
 -- TODO: Currently, this only updates the latencies. Should also allow updates for OtherStats, etc
 sendLatencies :: [NominalDiffTime] -> BChan [NominalDiffTime] -> IO GHC.Conc.Sync.ThreadId

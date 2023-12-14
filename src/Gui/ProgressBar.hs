@@ -4,14 +4,14 @@
 
 module GUI.ProgressBar where
 
-import Brick
-import qualified Brick.AttrMap as A
-import qualified Brick.Main as M
-import qualified Brick.Types as T
-import qualified Brick.Widgets.ProgressBar as P
-import qualified Graphics.Vty as V
-import Lens.Micro.Mtl
-import Lens.Micro.TH
+-- import Brick
+-- import qualified Brick.AttrMap as A
+-- import qualified Brick.Main as M
+-- import qualified Brick.Types as T
+-- import qualified Brick.Widgets.ProgressBar as P
+-- import qualified Graphics.Vty as V
+-- import Lens.Micro.Mtl
+-- import Lens.Micro.TH
 
 -- data MyAppState n = MyAppState {_x :: Float}
 

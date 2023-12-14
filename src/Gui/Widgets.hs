@@ -21,6 +21,7 @@ import Utils.Models (AttackResult (..), AttackResultMessage (..))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import qualified Graphics.Vty as V
+import Attacker.Attacker
 
 -- | Params is the set of attack parameters
 data Params = MkParams
@@ -203,17 +204,7 @@ drawErrors e =
     borderWithLabel (str "Errors") $
       Brick.str (show e)
 
-data MyAppState n = MyAppState {_x :: Float}
-
-makeLenses ''MyAppState
-
-initialPBState :: MyAppState ()
-initialPBState = MyAppState 0.0
-
-updateProgressbar :: Float -> Widget ()
-updateProgressbar newValue = drawProgressBar MyAppState {_x = newValue}
-
-drawProgressBar :: MyAppState () -> Widget ()
+drawProgressBar :: Float -> Widget ()
 drawProgressBar p = ui
   where
     -- use mapAttrNames
@@ -225,7 +216,7 @@ drawProgressBar p = ui
             ]
         )
         $ bar
-        $ _x p
+        $ p
     lbl c = Just $ show $ fromEnum $ c * 100
     bar v = P.progressBar (lbl v) v
     ui = xBar
