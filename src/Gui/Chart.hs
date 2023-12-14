@@ -209,16 +209,17 @@ myFillPlotWidget term_width myoptions mylatencies =
     internalWidget = T.Widget T.Greedy T.Greedy $ do
       ctx <- T.getContext
       let a = ctx ^. (T.attrL)
-      let curWidth = term_width
+      let curWidth = round (0.1 * fromIntegral term_width)
       let cur_strings = getPlotLines myoptions mylatencies
       let cur_string_width = textWidth (head cur_strings)
-      let newLatencies = resizeStringList mylatencies cur_string_width curWidth
-      -- let newStrings = [lastN' curWidth x | x <- cur_strings] -- this is working. updating latencies isn't (??)
+      let newLatencies = if cur_string_width > curWidth
+            then resizeStringList mylatencies cur_string_width curWidth
+            else mylatencies
+      let max_num_width = length (printf "%0.2f" (realToFrac $ maximum mylatencies :: Float) :: String)
+      -- let newStrings = [keepLabelAndLastN' max_num_width curWidth x | x <- cur_strings] -- this is working. updating latencies isn't (??)
       let newStrings = getPlotLines myoptions newLatencies
-      -- let b = assert (newLatencies /= mylatencies) "f"
       let plotLines = map TL.pack newStrings
       let image = V.vertCat $ map (V.text V.defAttr) plotLines
-      -- let borderstring = ("Latencies" ++ show cur_string_width ++ "  " ++ show curWidth)
       return $
         T.Result
           image
@@ -227,12 +228,21 @@ myFillPlotWidget term_width myoptions mylatencies =
           []
           Brick.BorderMap.empty
 
+
+keepLabelAndLastN' :: Int -> Int -> [a] -> [a]
+keepLabelAndLastN' skipNum n xs = (take skipNum xs) ++ (lastN' n (lastN' (length xs - skipNum) xs))
+
+-- >>> keepLabelAndLastN' 3 0 [1,2, 3,4,5,6,7,8,9]
+-- [1,2,3]
+
 resizeStringList :: [Double] -> Int -> Int -> [Double]
 -- resizeStringList mylatencies cur_string_width curWidth = downsample frac mylatencies
 --     where frac = fromIntegral curWidth / fromIntegral cur_string_width
 resizeStringList mylatencies cur_string_width curWidth = lastN' subN mylatencies
   where
-    subN = round (fromIntegral (length mylatencies) * (fromIntegral curWidth / fromIntegral cur_string_width))
+    subN = round (fromIntegral (length mylatencies) * 0.9)
+    -- subN = round (fromIntegral (length mylatencies) * (fromIntegral curWidth / fromIntegral cur_string_width))
+
 
 lastN' :: Int -> [a] -> [a]
 lastN' n xs = foldl' (const . drop 1) xs (drop n xs)
@@ -240,11 +250,6 @@ lastN' n xs = foldl' (const . drop 1) xs (drop n xs)
 assert :: Bool -> a -> a
 assert False x = error "assertion failed!"
 assert _ a = a
-
--- >>> resizeStringList [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] 120 100
--- >>> [lastN' 4 x | x <- ["Integer", "integeree"]]
--- [3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0]
--- ["eger","eree"]
 
 -- NOT USED RN
 downsample :: (RealFrac a) => a -> [b] -> [b]

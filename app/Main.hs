@@ -131,5 +131,5 @@ sendLatencies initLatencies chan = forkIO $ go initLatencies
       writeBChan chan newLatencies
 
       -- Wait for some time before sending the next update
-      threadDelay 1000000
+      threadDelay 10000
       go newLatencies

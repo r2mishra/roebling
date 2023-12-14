@@ -20,8 +20,11 @@ dummyUTCTime = UTCTime dummyDay dummyTime
 mySeries :: [Integer]
 mySeries = [1 .. 20]
 
+repli :: [a] -> Int -> [a]
+repli xs n = xs >>= replicate n
+
 myLatencies :: [NominalDiffTime]
-myLatencies = map fromRational [0.8, 0.7, 0.98, 0.55, 2]
+myLatencies = repli (map fromRational [0.8, 0.7, 0.98, 0.55, 2]) 20
 
 myoptions :: Options
 myoptions = MkOptions {height = 14}
