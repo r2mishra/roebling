@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 -- needed for makelenses
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 
 module GUI.Chart
   ( -- * Plot
@@ -17,6 +18,9 @@ module GUI.Chart
   )
 where
 
+import Args (Flags (..))
+import Attacker.Attacker (runAttacker)
+import qualified Attacker.Pacer as Pacer
 import Brick.AttrMap
 import qualified Brick.Main as M
 import qualified Brick.Types as T
@@ -26,8 +30,11 @@ import Brick.Widgets.Border.Style (unicode)
 import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.Core
 import qualified Brick.Widgets.ProgressBar as P
+import Control.Concurrent (Chan)
+import Control.Concurrent.Async (async, wait)
 import Control.Concurrent.STM (stateTVar)
 import Control.Monad (forM_)
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST.Safe (STArray, getElems, newArray, writeArray)
 import Data.Bool (bool)
@@ -42,6 +49,7 @@ import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import Text.Printf (printf)
 import Utils.Models
+import qualified Utils.Models as Models
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.
@@ -155,7 +163,9 @@ data AppState = AppState
     _statusCodes :: W.StatusCodes,
     _reqErrors :: W.Errors,
     _otherstats :: W.OtherStats,
-    _pbState :: Float
+    _pbState :: Float,
+    _cmdFlags :: Flags,
+    _attackChan :: Chan Models.AttackResultMessage
     -- Include other fields as necessary
   }
 
@@ -255,4 +265,36 @@ handleEvent e = case e of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ insert err e)
       Nothing -> return ()
   (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> M.halt
+  (T.VtyEvent (V.EvKey (V.KChar 'a') [])) -> do
+    myCmdFlags <- use cmdFlags
+    myAttackChan <- use attackChan
+    liftIO $ triggerAttack myCmdFlags myAttackChan
   _ -> return ()
+
+-- TODO handle multiple triggers, possibly by maintaining global state
+
+triggerAttack :: Flags -> Chan AttackResultMessage -> IO ()
+triggerAttack cmdFlags attackChan = do
+  let targetter = buildTargetter cmdFlags
+  let pacer = buildPacer cmdFlags
+  attackerThread <- async $ runAttacker attackChan targetter pacer
+  return ()
+
+-- wait attackerThread
+
+buildTargetter :: Args.Flags -> Models.Target
+buildTargetter cmdFlags =
+  Models.Target
+    { Models.url = Args.target cmdFlags,
+      Models.verb = Args.method cmdFlags,
+      Models.body = Args.body cmdFlags,
+      Models.bodyFile = Args.bodyFile cmdFlags,
+      Models.headers = [("Content-Type", "application/json")]
+    }
+
+buildPacer :: Args.Flags -> Pacer.PaceConfig
+buildPacer cmdFlags =
+  Pacer.PaceConfig
+    { Pacer.rate = Args.rate cmdFlags,
+      Pacer.duration = fromIntegral (Args.duration cmdFlags)
+    }

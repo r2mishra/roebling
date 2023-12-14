@@ -263,4 +263,4 @@ drawLegend =
   hLimit 30 $
     withBorderStyle unicode $
       borderWithLabel (str "Legend") $
-        Brick.str "q: Quit"
+        Brick.str "a: Attack q: Quit"
