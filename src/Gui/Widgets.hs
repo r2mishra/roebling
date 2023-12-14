@@ -3,9 +3,11 @@
 module GUI.Widgets where
 
 import Brick
+import qualified Brick.BorderMap
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)
 import qualified Brick.Widgets.Border.Style as BS
+import Brick.Widgets.Core (textWidth)
 import Control.Concurrent (Chan, readChan)
 import Data.List (sort)
 import qualified Data.Map as M
@@ -14,6 +16,8 @@ import Data.Text (Text)
 import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
+import qualified Graphics.Vty
+import Lens.Micro ((^.))
 import Network.URI (URI)
 import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
@@ -28,6 +32,9 @@ data Params = MkParams
     -- | HTTP request type (GET, etc)
     method :: Text
   }
+
+-- a :: Int
+-- a = textWidth ("fasas" :: String)
 
 -- TODO: Add centering to make sure latency plot occupies the full width
 drawLatencyStats :: [NominalDiffTime] -> Widget ()

@@ -18,6 +18,7 @@ module GUI.Chart
 where
 
 import Brick.AttrMap
+import qualified Brick.BorderMap
 import qualified Brick.Main as M
 import qualified Brick.Types as T
 import Brick.Widgets.Border (borderWithLabel)
@@ -30,14 +31,28 @@ import Control.Monad.ST (ST, runST)
 import Data.Array.ST.Safe (STArray, getElems, newArray, writeArray)
 import Data.Bool (bool)
 import Data.Char (isSpace)
-import Data.List (dropWhileEnd, unfoldr)
+import Data.Foldable (toList)
+import Data.List (dropWhileEnd, foldl', unfoldr)
+import qualified Data.Sequence as Seq
+import qualified Data.Text.Lazy as TL
 import Data.Time (NominalDiffTime)
+import Debug.Trace
 import GUI.Widgets (BytesWidget)
 import qualified GUI.Widgets as W
+import qualified Graphics.Vty
 import qualified Graphics.Vty as V
+import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
+import System.Console.Terminal.Size (size, width)
+import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf (printf)
+
+appendDebugLog :: String -> IO ()
+appendDebugLog msg = appendFile "debug.log" (msg ++ "\n")
+
+-- import Linear (downsample)
+-- import DSP.Basic (downsample)
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.
@@ -145,6 +160,7 @@ data AppState = AppState
   { _latencies :: [NominalDiffTime],
     _numDone :: Int, -- current progress
     _hitCount :: Int, -- total number needed
+    _termwidth :: Int,
     _bytesMetrics :: BytesWidget,
     _plotOptions :: Options,
     _params :: W.Params,
@@ -171,19 +187,85 @@ plotApp =
 theMap :: Brick.AttrMap.AttrMap
 theMap = Brick.AttrMap.attrMap V.defAttr []
 
--- | The plotting Widget
-plotWidget :: Options -> [Double] -> T.Widget n
-plotWidget myoptions mylatencies =
+-- -- | The plotting Widget
+-- plotWidget :: Options -> [Double] -> T.Widget n
+-- plotWidget myoptions mylatencies =
+--   joinBorders $
+--     withBorderStyle unicode $
+--       borderWithLabel (str "Latencies") $
+--         str (unlines $ getPlotLines myoptions mylatencies)
+
+-- BIGGEST HEADACHE
+myFillPlotWidget :: Int -> Options -> [Double] -> T.Widget n
+myFillPlotWidget term_width myoptions mylatencies =
   joinBorders $
-    withBorderStyle unicode $
-      borderWithLabel (str "Latencies") $
-        str (unlines $ getPlotLines myoptions mylatencies)
+    withBorderStyle
+      unicode
+      ( borderWithLabel
+          (str "Latencies")
+          internalWidget
+      )
+  where
+    internalWidget = T.Widget T.Greedy T.Greedy $ do
+      ctx <- T.getContext
+      let a = ctx ^. (T.attrL)
+      let curWidth = term_width
+      let cur_strings = getPlotLines myoptions mylatencies
+      let cur_string_width = textWidth (head cur_strings)
+      let newLatencies = resizeStringList mylatencies cur_string_width curWidth
+      -- let newStrings = [lastN' curWidth x | x <- cur_strings] -- this is working. updating latencies isn't (??)
+      let newStrings = getPlotLines myoptions newLatencies
+      -- let b = assert (newLatencies /= mylatencies) "f"
+      let plotLines = map TL.pack newStrings
+      let image = V.vertCat $ map (V.text V.defAttr) plotLines
+      -- let borderstring = ("Latencies" ++ show cur_string_width ++ "  " ++ show curWidth)
+      return $
+        T.Result
+          image
+          []
+          []
+          []
+          Brick.BorderMap.empty
+
+resizeStringList :: [Double] -> Int -> Int -> [Double]
+-- resizeStringList mylatencies cur_string_width curWidth = downsample frac mylatencies
+--     where frac = fromIntegral curWidth / fromIntegral cur_string_width
+resizeStringList mylatencies cur_string_width curWidth = lastN' subN mylatencies
+  where
+    subN = round (fromIntegral (length mylatencies) * (fromIntegral curWidth / fromIntegral cur_string_width))
+
+lastN' :: Int -> [a] -> [a]
+lastN' n xs = foldl' (const . drop 1) xs (drop n xs)
+
+assert :: Bool -> a -> a
+assert False x = error "assertion failed!"
+assert _ a = a
+
+-- >>> resizeStringList [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] 120 100
+-- >>> [lastN' 4 x | x <- ["Integer", "integeree"]]
+-- [3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0]
+-- ["eger","eree"]
+
+-- NOT USED RN
+downsample :: (RealFrac a) => a -> [b] -> [b]
+downsample frac lst
+  | frac >= 1 = lst
+  | otherwise = go 0 0
+  where
+    len = fromIntegral $ length lst
+    num_out = max (round (len * frac)) 1
+    step = round (len / fromIntegral num_out)
+    go i n
+      | i >= length lst = []
+      | n <= i = lst !! i : go (i + 1) (n + step)
+      | otherwise = go (i + 1) n
 
 -- | Final combined UI with all the Widgets
 drawUI :: AppState -> [T.Widget ()]
 drawUI state = [go]
   where
-    go = ui myparams myoptions mylatencies mybytes mystatuscodes myerrors myotherstats
+    go = ui mytermwidth myparams myoptions mylatencies mybytes mystatuscodes myerrors myotherstats
+    mytermwidth = _termwidth state
     myparams = _params state
     myoptions = _plotOptions state
     mylatencies = _latencies state
@@ -193,10 +275,10 @@ drawUI state = [go]
     myotherstats = _otherstats state
 
 -- The UI widget that includes the ASCII chart
-ui :: W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> T.Widget ()
-ui myparams myoptions mylatencies bytes statuscodes errors myotherstats =
+ui :: Int -> W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> T.Widget ()
+ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstats =
   vBox
-    [ plotWidget myoptions (map realToFrac mylatencies :: [Double]),
+    [ myFillPlotWidget termwidth myoptions (map realToFrac mylatencies :: [Double]),
       hBox
         [ W.drawParams myparams,
           W.drawLatencyStats mylatencies,
