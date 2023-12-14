@@ -18,14 +18,14 @@ module GUI.Chart
 where
 
 import Brick.AttrMap
-import Brick.Util
 import qualified Brick.Main as M
 import qualified Brick.Types as T
+import Brick.Util
 import Brick.Widgets.Border (borderWithLabel)
 import Brick.Widgets.Border.Style (unicode)
-import qualified Brick.Widgets.ProgressBar as P
 import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.Core
+import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent.STM (stateTVar)
 import Control.Monad (forM_)
 import Control.Monad.ST (ST, runST)

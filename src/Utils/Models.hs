@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use newtype instead of data" #-}
 module Utils.Models (AttackResult (..), AttackResultMessage (..), Target (..), PaceConfig (..), PacerResult (..)) where
 
 import Data.Text
@@ -5,7 +8,7 @@ import Data.Time
 import Network.HTTP.Simple (RequestHeaders)
 import Network.URI (URI)
 
-data AttackResult = AttackResult {seq :: Int, code :: Int, latency :: NominalDiffTime, error :: Maybe String} deriving (Show)
+data AttackResult = AttackResult {seq :: Int, code :: Int, latency :: NominalDiffTime, error :: Maybe String, bytesIn :: Integer, bytesOut :: Integer} deriving (Show)
 
 data AttackResultMessage = ResultMessage AttackResult deriving (Show)
 
