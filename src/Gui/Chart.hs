@@ -18,14 +18,14 @@ module GUI.Chart
 where
 
 import Brick.AttrMap
-import Brick.Util
 import qualified Brick.Main as M
 import qualified Brick.Types as T
+import Brick.Util
 import Brick.Widgets.Border (borderWithLabel)
 import Brick.Widgets.Border.Style (unicode)
-import qualified Brick.Widgets.ProgressBar as P
 import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.Core
+import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent.STM (stateTVar)
 import Control.Monad (forM_)
 import Control.Monad.ST (ST, runST)
@@ -251,6 +251,21 @@ handleEvent e = case e of
     -- TODO: Change to actual done percent
     pbState += 0.02
     
+    bytesMetrics %= (\(W.MkBytesWidget b) -> 
+        W.MkBytesWidget {
+          W.inMetrics = W.MkBytesMetrics {
+            W.totalB = (totalB $ inMetrics b) + (bytesIn newAttackResult),
+            W.meanB = ((meanB $ inMetrics b) * (numDone - 1) + (bytesIn newAttackResult)) / numDone
+          },
+          W.outMetrics = W.MkBytesMetrics {
+            W.totalB = (totalB $ outMetrics b) + (bytesOut newAttackResult),
+            W.meanB = ((meanB $ outMetrics b) * (numDone - 1) + (bytesOut newAttackResult)) / numDone
+          }
+        }
+        
+        -- $ b + (bytesIn newAttackResult + bytesOut newAttackResult)
+      ) 
+
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ insert err e)
       Nothing -> return ()

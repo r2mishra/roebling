@@ -1,13 +1,14 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TemplateHaskell #-}
+
 module GUI.Widgets where
 
 import Brick
+import qualified Brick.AttrMap as A
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)
 import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.ProgressBar as P
-import qualified Brick.AttrMap as A
 import Control.Concurrent (Chan, readChan)
 import Data.List (sort)
 import qualified Data.Map as M
@@ -16,12 +17,13 @@ import Data.Text (Text)
 import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
-import Network.URI (URI)
-import Utils.Models (AttackResult (..), AttackResultMessage (..))
+import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import qualified Graphics.Vty as V
 import Attacker.Attacker
+import Network.URI (URI)
+import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- | Params is the set of attack parameters
 data Params = MkParams
@@ -220,7 +222,6 @@ drawProgressBar p = ui
     lbl c = Just $ show $ fromEnum $ c * 100
     bar v = P.progressBar (lbl v) v
     ui = xBar
-
 
 theBaseAttr :: A.AttrName
 theBaseAttr = A.attrName "theBase"

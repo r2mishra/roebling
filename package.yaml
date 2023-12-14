@@ -47,7 +47,7 @@ dependencies:
 - tasty-hunit
 - network-uri
 - directory
-
+- ghc-datasize
 ghc-options:
 - -Wall
 - -Wcompat
