@@ -51,7 +51,7 @@ data Params = MkParams
 drawLatencyStats :: [NominalDiffTime] -> Widget ()
 drawLatencyStats latencies =
   withBorderStyle unicode $
-    borderWithLabel (str "Latencies") $
+    borderWithLabel (str "Latency Stats(s)") $
       Brick.str (formatStats latencies)
 
 formatStats :: [NominalDiffTime] -> String

@@ -98,8 +98,7 @@ initializeAndRunPlot cmdFlags chan = do
             _otherstats = myOtherStats,
             _numDone = 0,
             _hitCount = 0,
-            _pbState = W.initialPBState,
-            _termwidth = termwidth
+            _termwidth = termwidth,
             _pbState = 0.0
           }
   bchan <- newBChan 100

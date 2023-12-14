@@ -223,7 +223,7 @@ myFillPlotWidget term_width myoptions mylatencies =
     withBorderStyle
       unicode
       ( borderWithLabel
-          (str "Latencies")
+          (str "Latencies(s)")
           internalWidget
       )
   where
@@ -268,9 +268,9 @@ resizeStringList mylatencies cur_string_width curWidth = lastN' subN mylatencies
 lastN' :: Int -> [a] -> [a]
 lastN' n xs = foldl' (const . drop 1) xs (drop n xs)
 
-assert :: Bool -> a -> a
-assert False x = error "assertion failed!"
-assert _ a = a
+-- assert :: Bool -> a -> a
+-- assert False x = error "assertion failed!"
+-- assert _ a = a
 
 -- NOT USED RN
 downsample :: (RealFrac a) => a -> [b] -> [b]
@@ -290,7 +290,7 @@ downsample frac lst
 drawUI :: AppState -> [T.Widget ()]
 drawUI state = [go]
   where
-    go = ui mytermwidth myparams myoptions mylatencies mybytes mystatuscodes myerrors myotherstats
+    go = ui mytermwidth myparams myoptions mylatencies mybytes mystatuscodes myerrors myotherstats myprogressbar
     mytermwidth = _termwidth state
     myparams = _params state
     myoptions = _plotOptions state
@@ -302,10 +302,8 @@ drawUI state = [go]
     myprogressbar = _pbState state
 
 -- The UI widget that includes the ASCII chart
-ui :: Int -> W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> T.Widget ()
-ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstats =
-ui :: W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
-ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
+ui ::Int -> W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
+ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
   vBox
     [ myFillPlotWidget termwidth myoptions (map realToFrac mylatencies :: [Double]),
       hBox
