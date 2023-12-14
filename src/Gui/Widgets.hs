@@ -208,7 +208,7 @@ data MyAppState n = MyAppState {_x :: Float}
 makeLenses ''MyAppState
 
 initialPBState :: MyAppState ()
-initialPBState = MyAppState 0.5
+initialPBState = MyAppState 0.0
 
 updateProgressbar :: Float -> Widget ()
 updateProgressbar newValue = drawProgressBar MyAppState {_x = newValue}
