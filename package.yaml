@@ -47,6 +47,9 @@ dependencies:
 - tasty-hunit
 - network-uri
 - directory
+- microlens
+- linear
+- terminal-size
 
 ghc-options:
 - -Wall
