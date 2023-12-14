@@ -18,10 +18,12 @@ module GUI.Chart
 where
 
 import Brick.AttrMap
+import Brick.Util
 import qualified Brick.Main as M
 import qualified Brick.Types as T
 import Brick.Widgets.Border (borderWithLabel)
 import Brick.Widgets.Border.Style (unicode)
+import qualified Brick.Widgets.ProgressBar as P
 import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.Core
 import Control.Concurrent.STM (stateTVar)
@@ -38,6 +40,7 @@ import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import Text.Printf (printf)
+
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.
@@ -150,7 +153,8 @@ data AppState = AppState
     _params :: W.Params,
     _statusCodes :: W.StatusCodes,
     _reqErrors :: W.Errors,
-    _otherstats :: W.OtherStats
+    _otherstats :: W.OtherStats,
+    _pbState :: W.MyAppState ()
     -- Include other fields as necessary
   }
 
@@ -168,8 +172,25 @@ plotApp =
     }
 
 -- TODO: Dummy attribute map for now. Can add colors etc here
+-- theMap :: Brick.AttrMap.AttrMap
+-- theMap = Brick.AttrMap.attrMap V.defAttr []
+
 theMap :: Brick.AttrMap.AttrMap
-theMap = Brick.AttrMap.attrMap V.defAttr []
+theMap =
+  Brick.AttrMap.attrMap
+    V.defAttr
+    [ (theBaseAttr, bg V.brightBlack),
+      (xDoneAttr, V.green `on` V.green),
+      (xToDoAttr, V.white `on` V.black),
+      (P.progressIncompleteAttr, fg V.black)
+    ]
+
+theBaseAttr :: Brick.AttrMap.AttrName
+theBaseAttr = Brick.AttrMap.attrName "theBase"
+
+xDoneAttr, xToDoAttr :: Brick.AttrMap.AttrName
+xDoneAttr = theBaseAttr <> Brick.AttrMap.attrName "X:done"
+xToDoAttr = theBaseAttr <> Brick.AttrMap.attrName "X:remaining"
 
 -- | The plotting Widget
 plotWidget :: Options -> [Double] -> T.Widget n
@@ -183,7 +204,7 @@ plotWidget myoptions mylatencies =
 drawUI :: AppState -> [T.Widget ()]
 drawUI state = [go]
   where
-    go = ui myparams myoptions mylatencies mybytes mystatuscodes myerrors myotherstats
+    go = ui myparams myoptions mylatencies mybytes mystatuscodes myerrors myotherstats myprogressbar
     myparams = _params state
     myoptions = _plotOptions state
     mylatencies = _latencies state
@@ -191,10 +212,11 @@ drawUI state = [go]
     mystatuscodes = _statusCodes state
     myerrors = _reqErrors state
     myotherstats = _otherstats state
+    myprogressbar = _pbState state
 
 -- The UI widget that includes the ASCII chart
-ui :: W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> T.Widget ()
-ui myparams myoptions mylatencies bytes statuscodes errors myotherstats =
+ui :: W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> W.MyAppState () -> T.Widget ()
+ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
   vBox
     [ plotWidget myoptions (map realToFrac mylatencies :: [Double]),
       hBox
@@ -206,7 +228,8 @@ ui myparams myoptions mylatencies bytes statuscodes errors myotherstats =
               W.drawErrors errors
             ],
           W.drawOtherStats myotherstats
-        ]
+        ],
+      W.drawProgressBar myprogressbarstate
     ]
 
 -- TODO: Currently, an event is either a keyboard entry or a list of latencies. This should include other data like OtherStats, etc.

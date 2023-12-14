@@ -1,11 +1,13 @@
 {-# LANGUAGE InstanceSigs #-}
-
+{-# LANGUAGE TemplateHaskell #-}
 module GUI.Widgets where
 
 import Brick
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)
 import qualified Brick.Widgets.Border.Style as BS
+import qualified Brick.Widgets.ProgressBar as P
+import qualified Brick.AttrMap as A
 import Control.Concurrent (Chan, readChan)
 import Data.List (sort)
 import qualified Data.Map as M
@@ -16,6 +18,9 @@ import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
 import Network.URI (URI)
 import Utils.Models (AttackResult (..), AttackResultMessage (..))
+import Lens.Micro.Mtl
+import Lens.Micro.TH (makeLenses)
+import qualified Graphics.Vty as V
 
 -- | Params is the set of attack parameters
 data Params = MkParams
@@ -197,6 +202,51 @@ drawErrors e =
   withBorderStyle unicode $
     borderWithLabel (str "Errors") $
       Brick.str (show e)
+
+data MyAppState n = MyAppState {_x :: Float}
+
+makeLenses ''MyAppState
+
+initialPBState :: MyAppState ()
+initialPBState = MyAppState 0.0
+
+updateProgressbar :: Float -> Widget ()
+updateProgressbar newValue = drawProgressBar MyAppState {_x = newValue}
+
+drawProgressBar :: MyAppState () -> Widget ()
+drawProgressBar p = ui
+  where
+    -- use mapAttrNames
+    xBar =
+      updateAttrMap
+        ( A.mapAttrNames
+            [ (xDoneAttr, P.progressCompleteAttr),
+              (xToDoAttr, P.progressIncompleteAttr)
+            ]
+        )
+        $ bar
+        $ _x p
+    lbl c = Just $ show $ fromEnum $ c * 100
+    bar v = P.progressBar (lbl v) v
+    ui = xBar
+
+
+theBaseAttr :: A.AttrName
+theBaseAttr = A.attrName "theBase"
+
+xDoneAttr, xToDoAttr :: A.AttrName
+xDoneAttr = theBaseAttr <> A.attrName "X:done"
+xToDoAttr = theBaseAttr <> A.attrName "X:remaining"
+
+theMap :: A.AttrMap
+theMap =
+  A.attrMap
+    V.defAttr
+    [ (theBaseAttr, bg V.white),
+      (xDoneAttr, V.white `on` V.white),
+      (xToDoAttr, V.white `on` V.white),
+      (P.progressIncompleteAttr, fg V.white)
+    ]
 
 -- updatePlot :: Chan AttackResultMessage -> IO ()
 -- updatePlot channel = do
