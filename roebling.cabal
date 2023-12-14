@@ -56,7 +56,6 @@ library
     , directory
     , http-conduit
     , http-types
-    , linear
     , microlens
     , microlens-mtl
     , microlens-th
@@ -98,7 +97,6 @@ executable roebling-exe
     , directory
     , http-conduit
     , http-types
-    , linear
     , microlens
     , microlens-mtl
     , microlens-th
@@ -148,7 +146,6 @@ test-suite roebling-test
     , directory
     , http-conduit
     , http-types
-    , linear
     , microlens
     , microlens-mtl
     , microlens-th
