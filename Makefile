@@ -14,7 +14,7 @@ run:
 dev:
 	hpack
 	cabal build
-	cabal run roebling-exe  -- --method POST http://localhost:8000/post --body-file dummy_server/dummy_payload.json --rate 10 --duration 5
+	cabal run roebling-exe  -- --method POST http://localhost:8000/post --body-file dummy_server/dummy_payload.json --rate 10 --duration 5 --plotDemo
 
 fmt:
 	find . -name '*.hs' | xargs ormolu --mode inplace

@@ -228,7 +228,10 @@ ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogre
             ],
           W.drawOtherStats myotherstats
         ],
-      W.drawProgressBar myprogressbarstate
+      hBox
+        [ W.drawProgressBar myprogressbarstate,
+          W.drawLegend
+        ]
     ]
 
 -- TODO: Currently, an event is either a keyboard entry or a list of latencies. This should include other data like OtherStats, etc.
