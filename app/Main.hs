@@ -33,7 +33,7 @@ main = do
 
   putStrLn "Press Enter to start the attack"
   _ <- getLine
-  
+
   attackerThread <- async $ runAttacker attackChannel targetter pacer
   -- fetcherThread <- async $ runLogger attackChannel
 

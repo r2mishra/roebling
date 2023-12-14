@@ -206,7 +206,7 @@ drawErrors e =
       Brick.str (show e)
 
 drawProgressBar :: Float -> Widget ()
-drawProgressBar p = ui
+drawProgressBar p = hLimitPercent 65 ui
   where
     -- use mapAttrNames
     xBar =

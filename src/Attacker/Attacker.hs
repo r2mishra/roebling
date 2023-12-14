@@ -11,7 +11,6 @@ import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Monad
 import Data.Time
-import GHC.DataSize (recursiveSize)
 import Network.HTTP.Conduit
 import Network.HTTP.Types
 import Utils.Models
@@ -21,10 +20,10 @@ attacker requestObj manager hitCount = do
   begin <- getCurrentTime
   response <- httpLbs requestObj manager
   end <- getCurrentTime
-  bytesIn <- recursiveSize requestObj
-  bytesOut <- recursiveSize response
   let status = statusCode $ responseStatus response
       errorMessage = if status /= 200 then Just (getErrorMsg response) else Nothing
+      bytesOut = length response
+      bytesIn = length (show requestObj)
    in return (AttackResult hitCount status (end `diffUTCTime` begin) errorMessage (toInteger bytesIn) (toInteger bytesOut))
 
 getErrorMsg :: Response body -> String

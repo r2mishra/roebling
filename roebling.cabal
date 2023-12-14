@@ -54,7 +54,6 @@ library
     , bytestring
     , containers
     , directory
-    , ghc-datasize
     , http-conduit
     , http-types
     , microlens-mtl
@@ -84,7 +83,7 @@ executable roebling-exe
       app
   default-extensions:
       OverloadedStrings
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N2
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -threaded -rtsopts -with-rtsopts=-N2 -w
   build-depends:
       aeson
     , array
@@ -94,7 +93,6 @@ executable roebling-exe
     , bytestring
     , containers
     , directory
-    , ghc-datasize
     , http-conduit
     , http-types
     , microlens-mtl
@@ -120,6 +118,7 @@ test-suite roebling-test
   main-is: Spec.hs
   other-modules:
       Attacker.PacerTest
+      Attacker.TargeterTest
       DurationTest
       ProgressBarTest
       ResultLoggerTest
@@ -141,7 +140,6 @@ test-suite roebling-test
     , bytestring
     , containers
     , directory
-    , ghc-datasize
     , http-conduit
     , http-types
     , microlens-mtl
