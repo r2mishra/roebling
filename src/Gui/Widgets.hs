@@ -3,6 +3,7 @@
 
 module GUI.Widgets where
 
+import Attacker.Attacker
 import Brick
 import qualified Brick.AttrMap as A
 import Brick.Widgets.Border
@@ -20,8 +21,6 @@ import GHC.Base (VecElem (DoubleElemRep))
 import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
-import qualified Graphics.Vty as V
-import Attacker.Attacker
 import Network.URI (URI)
 import Utils.Models (AttackResult (..), AttackResultMessage (..))
 

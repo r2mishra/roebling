@@ -10,7 +10,7 @@ import Brick.BChan (BChan, newBChan, writeBChan)
 import qualified Brick.Main as M
 import Control.Concurrent (forkIO)
 import Control.Concurrent.Async
-import Control.Concurrent.Chan (newChan)
+import Control.Concurrent.Chan (Chan, newChan, readChan)
 import Control.Monad
 import Data.Time (NominalDiffTime)
 import GHC.Conc.IO (threadDelay)
@@ -35,9 +35,8 @@ main = do
 
   initializeAndRunPlot cmdFlags attackChannel
   wait attackerThread
-  -- wait fetcherThread
 
-
+-- wait fetcherThread
 
 buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =

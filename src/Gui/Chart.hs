@@ -41,7 +41,6 @@ import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import Text.Printf (printf)
-
 import Utils.Models
 
 data Options = MkOptions
@@ -237,11 +236,9 @@ ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogre
 -- TODO: Currently, an event is either a keyboard entry or a list of latencies. This should include other data like OtherStats, etc.
 handleEvent :: T.BrickEvent Name Utils.Models.AttackResultMessage -> T.EventM Name AppState ()
 handleEvent e = case e of
-  
   (T.AppEvent (ResultMessage newAttackResult)) -> do
-  
     latencies %= (++ [latency newAttackResult])
-    
+
     numDone += 1
     numDone' <- use numDone
 
@@ -250,10 +247,9 @@ handleEvent e = case e of
     -- pbState %= (\_ -> (fromIntegral numDone') / (fromIntegral hitCount'))
     -- TODO: Change to actual done percent
     pbState += 0.02
-    
+
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ insert err e)
       Nothing -> return ()
-
   (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> M.halt
   _ -> return ()
