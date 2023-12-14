@@ -20,6 +20,9 @@ dummyUTCTime = UTCTime dummyDay dummyTime
 mySeries :: [Integer]
 mySeries = [1 .. 20]
 
+repli :: [a] -> Int -> [a]
+repli xs n = xs >>= replicate n
+
 myLatencies :: [NominalDiffTime]
 myLatencies = map fromRational [0.1]
 
