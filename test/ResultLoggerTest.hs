@@ -2,7 +2,6 @@
 
 module ResultLoggerTest (resultLoggerTests) where
 
-import qualified Attacker.Attacker as A
 import qualified Attacker.ResultLogger as R
 import Control.Concurrent
 import Control.Concurrent.Async
