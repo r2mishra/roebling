@@ -54,6 +54,7 @@ library
     , bytestring
     , containers
     , directory
+    , ghc-datasize
     , http-conduit
     , http-types
     , microlens-mtl
@@ -93,6 +94,7 @@ executable roebling-exe
     , bytestring
     , containers
     , directory
+    , ghc-datasize
     , http-conduit
     , http-types
     , microlens-mtl
@@ -139,6 +141,7 @@ test-suite roebling-test
     , bytestring
     , containers
     , directory
+    , ghc-datasize
     , http-conduit
     , http-types
     , microlens-mtl
