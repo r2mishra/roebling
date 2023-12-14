@@ -36,8 +36,8 @@ main = do
   -- TODO: plotting is still sequential, uses only dummy data
   when (plotDemo cmdFlags) $ initializeAndRunPlot cmdFlags
 
-  when (progressBar cmdFlags) $ do
-    void $ M.defaultMain theApp initialPBState
+  -- when (progressBar cmdFlags) $ do
+  --   void $ M.defaultMain theApp initialPBState
 
   let targetter = buildTargetter cmdFlags
   let pacer = buildPacer cmdFlags
@@ -88,7 +88,8 @@ initializeAndRunPlot cmdFlags = do
             _reqErrors = myErrors,
             _otherstats = myOtherStats,
             _numDone = 0,
-            _hitCount = 0
+            _hitCount = 0,
+            _pbState = W.initialPBState
           }
   chan <- newBChan 10
   -- updates latencies in a new thread
@@ -96,7 +97,7 @@ initializeAndRunPlot cmdFlags = do
   -- TODO: this can be run in it's own thread as well.
   void $ M.customMainWithDefaultVty (Just chan) plotApp initialState
 
--- TODO: Currently, this only updates the latencies. Shoudl also allow updates for OtherStats, etc
+-- TODO: Currently, this only updates the latencies. Should also allow updates for OtherStats, etc
 sendLatencies :: [NominalDiffTime] -> BChan [NominalDiffTime] -> IO GHC.Conc.Sync.ThreadId
 sendLatencies initLatencies chan = forkIO $ go initLatencies
   where
