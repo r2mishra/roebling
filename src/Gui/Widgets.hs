@@ -3,6 +3,7 @@
 
 module GUI.Widgets where
 
+import Attacker.Attacker
 import Brick
 import qualified Brick.AttrMap as A
 import Brick.Widgets.Border
@@ -204,18 +205,8 @@ drawErrors e =
     borderWithLabel (str "Errors") $
       Brick.str (show e)
 
-data MyAppState n = MyAppState {_x :: Float}
-
-makeLenses ''MyAppState
-
-initialPBState :: MyAppState ()
-initialPBState = MyAppState 0.0
-
-updateProgressbar :: Float -> Widget ()
-updateProgressbar newValue = drawProgressBar MyAppState {_x = newValue}
-
-drawProgressBar :: MyAppState () -> Widget ()
-drawProgressBar p = ui
+drawProgressBar :: Float -> Widget ()
+drawProgressBar p = hLimitPercent 65 ui
   where
     -- use mapAttrNames
     xBar =
@@ -226,7 +217,7 @@ drawProgressBar p = ui
             ]
         )
         $ bar
-        $ _x p
+        $ p
     lbl c = Just $ show $ fromEnum $ c * 100
     bar v = P.progressBar (lbl v) v
     ui = xBar

@@ -33,6 +33,7 @@ import Data.Array.ST.Safe (STArray, getElems, newArray, writeArray)
 import Data.Bool (bool)
 import Data.Char (isSpace)
 import Data.List (dropWhileEnd, unfoldr)
+import Data.Set (insert)
 import Data.Time (NominalDiffTime)
 import GUI.Widgets (BytesWidget)
 import qualified GUI.Widgets as W
@@ -40,6 +41,7 @@ import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import Text.Printf (printf)
+import Utils.Models
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.
@@ -153,14 +155,14 @@ data AppState = AppState
     _statusCodes :: W.StatusCodes,
     _reqErrors :: W.Errors,
     _otherstats :: W.OtherStats,
-    _pbState :: W.MyAppState ()
+    _pbState :: Float
     -- Include other fields as necessary
   }
 
 makeLenses ''AppState -- provides a convenient way to access state vars while handling events
 
 -- | The main Brick application
-plotApp :: M.App AppState [NominalDiffTime] Name
+plotApp :: M.App AppState AttackResultMessage Name
 plotApp =
   M.App
     { M.appDraw = drawUI,
@@ -214,7 +216,7 @@ drawUI state = [go]
     myprogressbar = _pbState state
 
 -- The UI widget that includes the ASCII chart
-ui :: W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> W.MyAppState () -> T.Widget ()
+ui :: W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
 ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
   vBox
     [ plotWidget myoptions (map realToFrac mylatencies :: [Double]),
@@ -235,8 +237,22 @@ ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogre
     ]
 
 -- TODO: Currently, an event is either a keyboard entry or a list of latencies. This should include other data like OtherStats, etc.
-handleEvent :: T.BrickEvent Name [NominalDiffTime] -> T.EventM Name AppState ()
+handleEvent :: T.BrickEvent Name Utils.Models.AttackResultMessage -> T.EventM Name AppState ()
 handleEvent e = case e of
-  (T.AppEvent newLatencies) -> latencies %= const newLatencies
+  (T.AppEvent (ResultMessage newAttackResult)) -> do
+    latencies %= (++ [latency newAttackResult])
+
+    numDone += 1
+    numDone' <- use numDone
+
+    hitCount' <- use hitCount
+
+    -- pbState %= (\_ -> (fromIntegral numDone') / (fromIntegral hitCount'))
+    -- TODO: Change to actual done percent
+    pbState += 0.02
+
+    case Utils.Models.error newAttackResult of
+      Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ insert err e)
+      Nothing -> return ()
   (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> M.halt
   _ -> return ()

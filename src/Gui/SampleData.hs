@@ -21,7 +21,7 @@ mySeries :: [Integer]
 mySeries = [1 .. 20]
 
 myLatencies :: [NominalDiffTime]
-myLatencies = map fromRational [0.8, 0.7, 0.98, 0.55, 2]
+myLatencies = map fromRational [0.1]
 
 myoptions :: Options
 myoptions = MkOptions {height = 14}
