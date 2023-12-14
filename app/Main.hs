@@ -18,10 +18,17 @@ import GUI.ProgressBar
 import GUI.SampleData
 import qualified GUI.Widgets as W
 import Options.Applicative
+import System.Console.Terminal.Size (size, width)
+import System.IO
 import qualified Utils.Models as Models
+
+-- Somewhere in your initialization code
+setupDebugLog :: IO ()
+setupDebugLog = writeFile "debug.log" "Starting Debug Log\n"
 
 main :: IO ()
 main = do
+  setupDebugLog -- DEBUGGING
   cmdFlags <- execParser (info (helper <*> Args.flags) fullDesc)
   attackChannel <- newChan
   initializeAndRunPlot cmdFlags attackChannel
@@ -30,6 +37,13 @@ main = do
 -- Currently, this uses dummy data, can be extended to use data from the attacker
 initializeAndRunPlot :: Flags -> Chan Models.AttackResultMessage -> IO ()
 initializeAndRunPlot cmdFlags chan = do
+  -- get terminal width
+  maybeTermWidth <- size
+  let termwidth = case maybeTermWidth of
+        Just windowsize -> width windowsize
+        Nothing -> 80 -- a random default
+  print ("Term width: " ++ show termwidth)
+  -- _ <- putStrLn "Term width: " ++ termwidth
   let params =
         W.MkParams
           { W.target = target cmdFlags,
@@ -37,6 +51,7 @@ initializeAndRunPlot cmdFlags chan = do
             W.duration = duration cmdFlags,
             W.method = method cmdFlags
           }
+
       -- initial state with dummy data.
       -- TODO: latencies should be initialized as empty
       initialState =
@@ -50,6 +65,7 @@ initializeAndRunPlot cmdFlags chan = do
             _otherstats = myOtherStats,
             _numDone = 0,
             _hitCount = 0,
+            _termwidth = termwidth,
             _pbState = 0.0,
             _cmdFlags = cmdFlags,
             _attackChan = chan
