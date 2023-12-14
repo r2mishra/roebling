@@ -34,6 +34,10 @@ main = do
   let targetter = buildTargetter cmdFlags
   let pacer = buildPacer cmdFlags
   attackChannel <- newChan
+
+  putStrLn "Press Enter to start the attack"
+  _ <- getLine
+  
   attackerThread <- async $ runAttacker attackChannel targetter pacer
   fetcherThread <- async $ runLogger attackChannel
   -- graphThread <- async $ updatePlot attackChannel
