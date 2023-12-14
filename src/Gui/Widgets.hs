@@ -266,3 +266,10 @@ theMap =
 --               loop msg
 --             else do
 --               return ()
+
+drawLegend :: Widget ()
+drawLegend =
+  hLimit 30 $
+    withBorderStyle unicode $
+      borderWithLabel (str "Legend") $
+        Brick.str "q: Quit"
