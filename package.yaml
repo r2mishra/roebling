@@ -48,7 +48,6 @@ dependencies:
 - network-uri
 - directory
 - microlens
-- linear
 - terminal-size
 
 ghc-options:
@@ -77,6 +76,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N2
+    - -w
     dependencies:
     - roebling
 

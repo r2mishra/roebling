@@ -24,7 +24,7 @@ repli :: [a] -> Int -> [a]
 repli xs n = xs >>= replicate n
 
 myLatencies :: [NominalDiffTime]
-myLatencies = repli (map fromRational [0.8, 0.7, 0.98, 0.55, 2]) 20
+myLatencies = map fromRational [0.1]
 
 myoptions :: Options
 myoptions = MkOptions {height = 14}
