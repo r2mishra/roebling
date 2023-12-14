@@ -1,32 +1,24 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Main (main) where
 
 import Args
-import qualified Args
 import Attacker.Attacker (runAttacker)
 import qualified Attacker.Pacer as Pacer
 import Attacker.ResultLogger (runLogger)
-import qualified Attacker.Targeter as Targeter
-import Brick
 import Brick.BChan (BChan, newBChan, writeBChan)
 import qualified Brick.Main as M
-import Brick.Widgets.Border
-import Brick.Widgets.Border.Style
-import Control.Concurrent (Chan, forkIO, newChan, readChan, threadDelay)
+import Control.Concurrent (forkIO)
 import Control.Concurrent.Async
+import Control.Concurrent.Chan (newChan)
 import Control.Monad
-import Data.Monoid
-import Data.Text (unpack)
 import Data.Time (NominalDiffTime)
+import GHC.Conc.IO (threadDelay)
 import qualified GHC.Conc.Sync
-import GUI.Chart (AppState (..), Options (..), getPlotLines, plotApp)
+import GUI.Chart
 import GUI.ProgressBar
 import GUI.SampleData
 import qualified GUI.Widgets as W
-import qualified Graphics.Vty as V
-import Graphics.Vty.CrossPlatform
 import Options.Applicative
 import System.Console.Terminal.Size (size, width)
 import System.IO
@@ -43,18 +35,16 @@ main = do
   -- TODO: plotting is still sequential, uses only dummy data
   when (plotDemo cmdFlags) $ initializeAndRunPlot cmdFlags
 
-  -- maybeTermWidth <- size
-  -- let termwidth = case maybeTermWidth of
-  --       Just windowsize -> width windowsize
-  --       Nothing -> 80 -- a random default
-  -- print ("Term width: " ++ show termwidth)
-
   when (progressBar cmdFlags) $ do
     void $ M.defaultMain theApp initialPBState
 
   let targetter = buildTargetter cmdFlags
   let pacer = buildPacer cmdFlags
   attackChannel <- newChan
+
+  putStrLn "Press Enter to start the attack"
+  _ <- getLine
+  
   attackerThread <- async $ runAttacker attackChannel targetter pacer
   fetcherThread <- async $ runLogger attackChannel
   -- graphThread <- async $ updatePlot attackChannel
@@ -110,6 +100,7 @@ initializeAndRunPlot cmdFlags = do
             _otherstats = myOtherStats,
             _numDone = 0,
             _hitCount = 0,
+            _pbState = W.initialPBState,
             _termwidth = termwidth
           }
   chan <- newBChan 10
@@ -118,7 +109,7 @@ initializeAndRunPlot cmdFlags = do
   -- TODO: this can be run in it's own thread as well.
   void $ M.customMainWithDefaultVty (Just chan) plotApp initialState
 
--- TODO: Currently, this only updates the latencies. Shoudl also allow updates for OtherStats, etc
+-- TODO: Currently, this only updates the latencies. Should also allow updates for OtherStats, etc
 sendLatencies :: [NominalDiffTime] -> BChan [NominalDiffTime] -> IO GHC.Conc.Sync.ThreadId
 sendLatencies initLatencies chan = forkIO $ go initLatencies
   where

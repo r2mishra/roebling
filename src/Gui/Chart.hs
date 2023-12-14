@@ -21,10 +21,12 @@ import Brick.AttrMap
 import qualified Brick.BorderMap
 import qualified Brick.Main as M
 import qualified Brick.Types as T
+import Brick.Util
 import Brick.Widgets.Border (borderWithLabel)
 import Brick.Widgets.Border.Style (unicode)
 import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.Core
+import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent.STM (stateTVar)
 import Control.Monad (forM_)
 import Control.Monad.ST (ST, runST)
@@ -166,7 +168,8 @@ data AppState = AppState
     _params :: W.Params,
     _statusCodes :: W.StatusCodes,
     _reqErrors :: W.Errors,
-    _otherstats :: W.OtherStats
+    _otherstats :: W.OtherStats,
+    _pbState :: W.MyAppState ()
     -- Include other fields as necessary
   }
 
@@ -184,8 +187,25 @@ plotApp =
     }
 
 -- TODO: Dummy attribute map for now. Can add colors etc here
+-- theMap :: Brick.AttrMap.AttrMap
+-- theMap = Brick.AttrMap.attrMap V.defAttr []
+
 theMap :: Brick.AttrMap.AttrMap
-theMap = Brick.AttrMap.attrMap V.defAttr []
+theMap =
+  Brick.AttrMap.attrMap
+    V.defAttr
+    [ (theBaseAttr, bg V.brightBlack),
+      (xDoneAttr, V.green `on` V.green),
+      (xToDoAttr, V.white `on` V.black),
+      (P.progressIncompleteAttr, fg V.black)
+    ]
+
+theBaseAttr :: Brick.AttrMap.AttrName
+theBaseAttr = Brick.AttrMap.attrName "theBase"
+
+xDoneAttr, xToDoAttr :: Brick.AttrMap.AttrName
+xDoneAttr = theBaseAttr <> Brick.AttrMap.attrName "X:done"
+xToDoAttr = theBaseAttr <> Brick.AttrMap.attrName "X:remaining"
 
 -- -- | The plotting Widget
 -- plotWidget :: Options -> [Double] -> T.Widget n
@@ -278,6 +298,7 @@ drawUI state = [go]
     mystatuscodes = _statusCodes state
     myerrors = _reqErrors state
     myotherstats = _otherstats state
+    myprogressbar = _pbState state
 
 -- The UI widget that includes the ASCII chart
 ui :: Int -> W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> T.Widget ()
@@ -293,6 +314,10 @@ ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstat
               W.drawErrors errors
             ],
           W.drawOtherStats myotherstats
+        ],
+      hBox
+        [ W.drawProgressBar myprogressbarstate,
+          W.drawLegend
         ]
     ]
 

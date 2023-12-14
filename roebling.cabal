@@ -54,6 +54,7 @@ library
     , bytestring
     , containers
     , directory
+    , ghc-datasize
     , http-conduit
     , http-types
     , linear
@@ -96,6 +97,7 @@ executable roebling-exe
     , bytestring
     , containers
     , directory
+    , ghc-datasize
     , http-conduit
     , http-types
     , linear
@@ -145,6 +147,7 @@ test-suite roebling-test
     , bytestring
     , containers
     , directory
+    , ghc-datasize
     , http-conduit
     , http-types
     , linear

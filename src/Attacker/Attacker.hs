@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+
 module Attacker.Attacker
   ( runAttacker,
   )
@@ -9,19 +11,21 @@ import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Monad
 import Data.Time
+import GHC.DataSize (recursiveSize)
 import Network.HTTP.Conduit
 import Network.HTTP.Types
 import Utils.Models
 
-attacker :: Target -> Manager -> Int -> IO AttackResult
-attacker target manager hitCount = do
-  requestObj <- request target
+attacker :: Request -> Manager -> Int -> IO AttackResult
+attacker requestObj manager hitCount = do
   begin <- getCurrentTime
   response <- httpLbs requestObj manager
   end <- getCurrentTime
+  bytesIn <- recursiveSize requestObj
+  bytesOut <- recursiveSize response
   let status = statusCode $ responseStatus response
       errorMessage = if status /= 200 then Just (getErrorMsg response) else Nothing
-   in return (AttackResult hitCount status (end `diffUTCTime` begin) errorMessage)
+   in return (AttackResult hitCount status (end `diffUTCTime` begin) errorMessage (toInteger bytesIn) (toInteger bytesOut))
 
 getErrorMsg :: Response body -> String
 getErrorMsg response = show (statusMessage (responseStatus response))
@@ -30,7 +34,7 @@ runAttacker :: Chan AttackResultMessage -> Target -> PaceConfig -> IO ()
 runAttacker channel target config = do
   began <- getCurrentTime
   manager <- newManager tlsManagerSettings
-
+  targetRequest <- request target
   let loop hitCount = do
         res <- pace began hitCount config
         let PacerResult shouldStop shouldWaitTime = res
@@ -41,7 +45,7 @@ runAttacker channel target config = do
             when (shouldWaitTime > 0) $ do
               threadDelay (floor $ shouldWaitTime * 1000000)
             _ <- async $ do
-              msg <- attacker target manager hitCount
+              msg <- attacker targetRequest manager hitCount
               writeChan channel $ ResultMessage msg
             loop (hitCount + 1)
   loop 0
