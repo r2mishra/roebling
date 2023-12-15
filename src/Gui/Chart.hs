@@ -1,4 +1,4 @@
---- Reference: https://github.com/madnight/asciichart
+--- Reference for ASCII line chart: https://github.com/madnight/asciichart
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 -- needed for makelenses
@@ -42,21 +42,19 @@ import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Text.Lazy as TL
 import Data.Time (NominalDiffTime, TimeLocale (wDays))
+import Data.Time.Clock (diffUTCTime)
 import Debug.Trace
 import GUI.Widgets (BytesWidget, OtherStats (..))
 import qualified GUI.Widgets as W
+import Graphics.Vty (horizCat)
 import qualified Graphics.Vty
 import qualified Graphics.Vty as V
-import Lens.Micro ((^.))
+import Lens.Micro (to, (&), (.~), (^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
+import System.Exit (exitSuccess)
 import Text.Printf (printf)
 import Utils.Models
-import Data.Time.Clock (diffUTCTime)
-import System.Exit (exitSuccess)
-import Lens.Micro ((^.), (&), (.~), to)
-import Graphics.Vty (horizCat)
-
 
 appendDebugLog :: String -> IO ()
 appendDebugLog msg = appendFile "debug.log" (msg ++ "\n")
@@ -66,6 +64,7 @@ data Options = MkOptions
     height :: Int
   }
 
+-- Helper functions from asciichart: https://github.com/madnight/asciichart
 newArray2D ::
   Integer ->
   Integer ->
@@ -82,6 +81,7 @@ pad series =
       toStr = fmap (printf "%0.2f")
    in maximum $ length <$> toStr floats
 
+-- plotting function from asciichart. Modified to work with Doubles.
 plotWith' :: Options -> [Double] -> [String]
 plotWith' _ [] = []
 plotWith' opts series =
@@ -138,11 +138,7 @@ plotWith' opts series =
         getElems arr
 
 -- -- | Takes a List of Integers and prints out a
--- --   corresponding chart with a default terminal height of 14 blocks.
--- plot :: [Double] -> IO ()
--- plot x = if length x < 1 then return () else plotWith options x
-
--- | Same as plot but it's possible to define custom options.
+-- --   corresponding chart with custom options for height.
 --   Example: @'plotWith' options { 'height' = 20 }@
 plotWith :: Options -> [Double] -> IO ()
 plotWith options' series =
@@ -151,7 +147,9 @@ plotWith options' series =
   where
     result = splitEvery (length series + 4) $ plotWith' options' series
 
--- TODO: what's the magic 4 number used by asciichart?
+------ Brick UI logic ----
+
+-- | Internal plot helper to get the ascii line chart as a list of strings
 getPlotLines :: Options -> [Double] -> [String]
 getPlotLines _ [] = []
 getPlotLines options' series = map (dropWhileEnd isSpace . concat) result
@@ -160,6 +158,7 @@ getPlotLines options' series = map (dropWhileEnd isSpace . concat) result
 
 type Name = ()
 
+-- | The UI's app state. Currently stores latencies, current progress, cmd flags, etc
 data AppState = AppState
   { _latencies :: [NominalDiffTime],
     _numDone :: Int, -- current progress
@@ -172,7 +171,6 @@ data AppState = AppState
     _otherstats :: W.OtherStats,
     _pbState :: Float,
     _numSuccess :: Int -- num of successful requests (200)
-    -- Include other fields as necessary
   }
 
 makeLenses ''AppState -- provides a convenient way to access state vars while handling events
@@ -188,10 +186,7 @@ plotApp =
       M.appAttrMap = const theMap
     }
 
--- TODO: Dummy attribute map for now. Can add colors etc here
--- theMap :: Brick.AttrMap.AttrMap
--- theMap = Brick.AttrMap.attrMap V.defAttr []
-
+-- | The attribute map. Stores custom attributes for the progress bar.
 theMap :: Brick.AttrMap.AttrMap
 theMap =
   Brick.AttrMap.attrMap
@@ -209,15 +204,7 @@ xDoneAttr, xToDoAttr :: Brick.AttrMap.AttrName
 xDoneAttr = theBaseAttr <> Brick.AttrMap.attrName "X:done"
 xToDoAttr = theBaseAttr <> Brick.AttrMap.attrName "X:remaining"
 
--- -- | The plotting Widget
--- plotWidget :: Options -> [Double] -> T.Widget n
--- plotWidget myoptions mylatencies =
---   joinBorders $
---     withBorderStyle unicode $
---       borderWithLabel (str "Latencies") $
---         str (unlines $ getPlotLines myoptions mylatencies)
-
--- BIGGEST HEADACHE
+-- | The plotting Widget. Automatically resizes to fit terminal width
 myFillPlotWidget :: Options -> [Double] -> T.Widget n
 myFillPlotWidget myoptions mylatencies =
   joinBorders $
@@ -230,16 +217,16 @@ myFillPlotWidget myoptions mylatencies =
   where
     internalWidget = T.Widget T.Greedy T.Greedy $ do
       ctx <- T.getContext
-      let a = ctx ^. (T.attrL)
+      let a = ctx ^. T.attrL
       -- c <- T.getContext
-      let fullWidth =  (ctx^.T.availWidthL)
+      let fullWidth = ctx ^. T.availWidthL
       let curWidth = round (0.6 * fromIntegral fullWidth) -- more conservative to see updates quickly
       let cur_strings = getPlotLines myoptions mylatencies
-      let cur_string_width = if length cur_strings > 0 then textWidth (head cur_strings) else 0
-      let newLatencies = if cur_string_width > curWidth
+      let cur_string_width = if not (null cur_strings) then textWidth (head cur_strings) else 0
+      let newLatencies =
+            if cur_string_width > curWidth
               then resizeStringList mylatencies cur_string_width curWidth
               else mylatencies
-      let max_num_width = length (printf "%0.2f" (realToFrac $ maximum mylatencies :: Float) :: String)
       let newStrings = getPlotLines myoptions newLatencies
       let bottomString = concat $ replicate fullWidth "-"
       let plotLines = map TL.pack (newStrings ++ [bottomString])
@@ -253,10 +240,7 @@ myFillPlotWidget myoptions mylatencies =
           Brick.BorderMap.empty
 
 keepLabelAndLastN' :: Int -> Int -> [a] -> [a]
-keepLabelAndLastN' skipNum n xs = (take skipNum xs) ++ (lastN' n (lastN' (length xs - skipNum) xs))
-
--- >>> keepLabelAndLastN' 3 0 [1,2, 3,4,5,6,7,8,9]
--- [1,2,3]
+keepLabelAndLastN' skipNum n xs = take skipNum xs ++ lastN' n (lastN' (length xs - skipNum) xs)
 
 resizeStringList :: [Double] -> Int -> Int -> [Double]
 resizeStringList mylatencies cur_string_width curWidth = lastN' subN mylatencies
@@ -280,8 +264,8 @@ drawUI state = [go]
     myotherstats = _otherstats state
     myprogressbar = _pbState state
 
--- The UI widget that includes the ASCII chart
-ui ::  W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
+-- | The UI widget that includes the ASCII chart
+ui :: W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
 ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
   vBox
     [ myFillPlotWidget myoptions (map realToFrac mylatencies :: [Double]),
@@ -292,68 +276,71 @@ ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogre
         ]
     ]
 
-fillWidgetsEvenly :: W.Params -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes  -> W.Errors -> W.OtherStats -> T.Widget ()
+fillWidgetsEvenly :: W.Params -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> T.Widget ()
 fillWidgetsEvenly myparams mylatencies bytes statuscodes errors myotherstats =
-   (T.Widget T.Greedy T.Greedy $ do
-                -- Compute translation offset so that loc is in the middle of the
-                -- rendering area
-                c <- T.getContext
-                let fullWidth = c^.T.availWidthL
-                    fullHeight = c^.T.availHeightL
-                let indWidth = fullWidth
-                let getrightPaddingAmt result maxWidth = max 0 $ maxWidth - V.imageWidth (result^.T.imageL)
-                let getBottomPaddingAmt result maxHeight = max 0 $ maxHeight - V.imageHeight (result^.T.imageL)
-                let getRightPadding result maxWidth = V.charFill (c^.T.attrL) ' ' (getrightPaddingAmt result maxWidth) (V.imageHeight $ result^.T.imageL) 
-                let getPaddedImg result maxWidth = horizCat [result^.T.imageL, getRightPadding result maxWidth]
-                curResult <- T.render $ (hBox
-                  [ W.drawBorder "Params" $  W.drawParams myparams,
-                     W.drawBorder "Params" $ W.drawLatencyStats mylatencies,
-                     W.drawBorder "Params" $ W.drawBytes bytes,
-                    vBox
-                      [ W.drawBorder "Params" $  W.drawStatusCodes statuscodes,
-                         W.drawBorder "Params" $ W.drawErrors errors
-                      ],
-                    W.drawBorder "Params" $  W.drawOtherStats myotherstats
-                  ]
-                  )
-                let curHeight =  V.imageHeight (curResult^.T.imageL)
-                let equalPad = getrightPaddingAmt curResult indWidth `div` 5
-                latencyResult <- T.render $  W.drawLatencyStats mylatencies
-                paramResult <- T.render $ W.drawParams myparams
-                bytesResult <- T.render $ W.drawBytes bytes
-                errorAndStatResult <- T.render $ vBox
-                      [ W.drawStatusCodes statuscodes,
-                        W.drawBorder "Errors" $ W.drawErrors errors
-                      ]
-                errorResult <- T.render $ W.drawErrors errors
-                statResult <- T.render $ W.drawStatusCodes statuscodes
-                let errorRightPad = (max (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (errorResult^.T.imageL)) 0) + equalPad
-                let statRightPad = (max (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (statResult^.T.imageL)) 0) + equalPad
-                otherResult <- T.render $ W.drawOtherStats myotherstats
-                let paramBottomPad = getBottomPaddingAmt paramResult curHeight
-                let latencyBottomPad = getBottomPaddingAmt latencyResult curHeight
-                let bytesBottomPad = getBottomPaddingAmt bytesResult curHeight
-                let errorBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) `div` 2
-                let statCodeBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) - errorBottomPad
-                let otherBottomPad = (getBottomPaddingAmt otherResult curHeight) 
-                fullResult <- T.render $ (hBox [
-                    W.drawBorder "Params" $ padBottom (Pad paramBottomPad) $ padRight (Pad equalPad) $ W.drawParams myparams,
-                    W.drawBorder "Latency Stats(s)" $ padBottom (Pad latencyBottomPad) $ padRight (Pad equalPad) $ W.drawLatencyStats mylatencies,
-                    W.drawBorder "Bytes" $ padBottom (Pad bytesBottomPad) $ padRight (Pad equalPad) $ W.drawBytes bytes,
-                    vBox
-                      [ W.drawBorder "Status Codes" $ padBottom (Pad statCodeBottomPad) $ padRight (Pad statRightPad) $ W.drawStatusCodes statuscodes,
-                        W.drawBorder "Errors" $ padBottom (Pad errorBottomPad) $  padRight (Pad errorRightPad) $ W.drawErrors errors
-                      ],
-                      W.drawBorder "Other Stats" $ padBottom (Pad otherBottomPad) $ padRight Max $ W.drawOtherStats myotherstats
-                  ])
-                return (fullResult)
-    )
+  T.Widget T.Greedy T.Greedy $ do
+    -- Compute translation offset so that loc is in the middle of the
+    -- rendering area
+    c <- T.getContext
+    let fullWidth = c ^. T.availWidthL
+        fullHeight = c ^. T.availHeightL
+    let indWidth = fullWidth
+    let getrightPaddingAmt result maxWidth = max 0 $ maxWidth - V.imageWidth (result ^. T.imageL)
+    let getBottomPaddingAmt result maxHeight = max 0 $ maxHeight - V.imageHeight (result ^. T.imageL)
+    let getRightPadding result maxWidth = V.charFill (c ^. T.attrL) ' ' (getrightPaddingAmt result maxWidth) (V.imageHeight $ result ^. T.imageL)
+    let getPaddedImg result maxWidth = horizCat [result ^. T.imageL, getRightPadding result maxWidth]
+    curResult <-
+      T.render
+        ( hBox
+            [ W.drawBorder "Params" $ W.drawParams myparams,
+              W.drawBorder "Params" $ W.drawLatencyStats mylatencies,
+              W.drawBorder "Params" $ W.drawBytes bytes,
+              vBox
+                [ W.drawBorder "Params" $ W.drawStatusCodes statuscodes,
+                  W.drawBorder "Params" $ W.drawErrors errors
+                ],
+              W.drawBorder "Params" $ W.drawOtherStats myotherstats
+            ]
+        )
+    let curHeight = V.imageHeight (curResult ^. T.imageL)
+    let equalPad = getrightPaddingAmt curResult indWidth `div` 5
+    latencyResult <- T.render $ W.drawLatencyStats mylatencies
+    paramResult <- T.render $ W.drawParams myparams
+    bytesResult <- T.render $ W.drawBytes bytes
+    errorAndStatResult <-
+      T.render $
+        vBox
+          [ W.drawStatusCodes statuscodes,
+            W.drawBorder "Errors" $ W.drawErrors errors
+          ]
+    errorResult <- T.render $ W.drawErrors errors
+    statResult <- T.render $ W.drawStatusCodes statuscodes
+    let errorRightPad = max (V.imageWidth (errorAndStatResult ^. T.imageL) - V.imageWidth (errorResult ^. T.imageL)) 0 + equalPad
+    let statRightPad = max (V.imageWidth (errorAndStatResult ^. T.imageL) - V.imageWidth (statResult ^. T.imageL)) 0 + equalPad
+    otherResult <- T.render $ W.drawOtherStats myotherstats
+    let paramBottomPad = getBottomPaddingAmt paramResult curHeight
+    let latencyBottomPad = getBottomPaddingAmt latencyResult curHeight
+    let bytesBottomPad = getBottomPaddingAmt bytesResult curHeight
+    let errorBottomPad = getBottomPaddingAmt errorAndStatResult curHeight `div` 2
+    let statCodeBottomPad = getBottomPaddingAmt errorAndStatResult curHeight - errorBottomPad
+    let otherBottomPad = getBottomPaddingAmt otherResult curHeight
+    T.render
+      ( hBox
+          [ W.drawBorder "Params" $ padBottom (Pad paramBottomPad) $ padRight (Pad equalPad) $ W.drawParams myparams,
+            W.drawBorder "Latency Stats(s)" $ padBottom (Pad latencyBottomPad) $ padRight (Pad equalPad) $ W.drawLatencyStats mylatencies,
+            W.drawBorder "Bytes" $ padBottom (Pad bytesBottomPad) $ padRight (Pad equalPad) $ W.drawBytes bytes,
+            vBox
+              [ W.drawBorder "Status Codes" $ padBottom (Pad statCodeBottomPad) $ padRight (Pad statRightPad) $ W.drawStatusCodes statuscodes,
+                W.drawBorder "Errors" $ padBottom (Pad errorBottomPad) $ padRight (Pad errorRightPad) $ W.drawErrors errors
+              ],
+            W.drawBorder "Other Stats" $ padBottom (Pad otherBottomPad) $ padRight Max $ W.drawOtherStats myotherstats
+          ]
+      )
 
--- TODO: Currently, an event is either a keyboard entry or a list of latencies. This should include other data like OtherStats, etc.
+-- | UI Event handler. Listens for new AttackResultMessage events and updates the AppState
 handleEvent :: T.BrickEvent Name (Either Utils.Models.AttackResultMessage Float) -> T.EventM Name AppState ()
 handleEvent e = case e of
   (T.AppEvent (Right f)) -> do
-
     numDone' <- use numDone
     pbState %= (\_ -> if numDone' == 0 then 0 else min f 1.0)
   (T.AppEvent (Left (ResultMessage newAttackResult))) -> do
@@ -380,12 +367,12 @@ handleEvent e = case e of
         where
           withoutQuotes = filter (/= '"') err
       Nothing -> return ()
-
   (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> do
     M.halt
     liftIO exitSuccess
   _ -> return ()
 
+-- | Updates the byte metrics widget with new entries
 updatedByteMetrics :: Integer -> Integer -> Int -> BytesWidget -> BytesWidget
 updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
   W.MkBytesWidget
@@ -401,24 +388,25 @@ updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
           }
     }
 
-
+-- | Updates the other statistics widget with new entries
 updateOtherStats :: Int -> Int -> AttackResult -> OtherStats -> OtherStats
 updateOtherStats numHits numSuccess result oldStats =
   oldStats
-    { requests = numHits
-    , success = fromIntegral numSuccess / fromIntegral numHits
-    , earliest = earliest
-    , latest = Utils.Models.requestTimestamp result
-    , end = Utils.Models.responseTimestamp result
-    , throughput = fromIntegral numSuccess / realToFrac (diffUTCTime latest earliest)
+    { requests = numHits,
+      success = fromIntegral numSuccess / fromIntegral numHits,
+      earliest = earliest,
+      latest = Utils.Models.requestTimestamp result,
+      end = Utils.Models.responseTimestamp result,
+      throughput = fromIntegral numSuccess / realToFrac (diffUTCTime latest earliest)
     }
   where
-    earliest = if numHits == 1
-               then Utils.Models.requestTimestamp result
-               else W.earliest oldStats
-    latest  = Utils.Models.responseTimestamp result
+    earliest =
+      if numHits == 1
+        then Utils.Models.requestTimestamp result
+        else W.earliest oldStats
+    latest = Utils.Models.responseTimestamp result
 
-
+-- | Updates the status code widget with new entries
 updateStatusCode :: W.StatusCodes -> String -> W.StatusCodes
 updateStatusCode (W.MkStatusCodes codes) key = W.MkStatusCodes updatedCodes
   where

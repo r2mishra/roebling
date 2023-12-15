@@ -45,8 +45,7 @@ myStatusCodes = MkStatusCodes {statusCodes = M.fromList []}
 myOtherStats :: OtherStats
 myOtherStats =
   MkOtherStats
-    { 
-      requests = 0,
+    { requests = 0,
       throughput = 0.0,
       success = 0.0,
       -- TODO: Update the dummy times to real times
