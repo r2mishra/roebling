@@ -83,6 +83,7 @@ pad series =
    in maximum $ length <$> toStr floats
 
 plotWith' :: Options -> [Double] -> [String]
+plotWith' _ [] = []
 plotWith' opts series =
   -- variables and functions
   let min' = minimum series
@@ -152,6 +153,7 @@ plotWith options' series =
 
 -- TODO: what's the magic 4 number used by asciichart?
 getPlotLines :: Options -> [Double] -> [String]
+getPlotLines _ [] = []
 getPlotLines options' series = map (dropWhileEnd isSpace . concat) result
   where
     result = splitEvery (length series + 4) $ plotWith' options' series
@@ -233,7 +235,7 @@ myFillPlotWidget myoptions mylatencies =
       let fullWidth =  (ctx^.T.availWidthL)
       let curWidth = round (0.6 * fromIntegral fullWidth) -- more conservative to see updates quickly
       let cur_strings = getPlotLines myoptions mylatencies
-      let cur_string_width = textWidth (head cur_strings)
+      let cur_string_width = if length cur_strings > 0 then textWidth (head cur_strings) else 0
       let newLatencies = if cur_string_width > curWidth
               then resizeStringList mylatencies cur_string_width curWidth
               else mylatencies
