@@ -50,7 +50,6 @@ import qualified Graphics.Vty as V
 import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
-import System.Console.Terminal.Size (size, width)
 import System.Exit (exitSuccess)
 import System.IO.Unsafe (unsafePerformIO)
 import Lens.Micro ((^.), (&), (.~), to)
