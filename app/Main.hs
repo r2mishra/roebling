@@ -36,6 +36,7 @@ main = do
   _ <- getLine
 
   attackerThread <- async $ runAttacker attackChannel targetter pacer
+
   appendFile "results.log" ("Log for attacking url:" ++ (show (Args.target cmdFlags)) ++ "\n")
   fetcherThread <- async $ runLogger "results.log" attackChannel
 
@@ -68,8 +69,7 @@ initializeAndRunPlot cmdFlags chan = do
   let termwidth = case maybeTermWidth of
         Just windowsize -> width windowsize
         Nothing -> 80 -- a random default
-  print ("Term width: " ++ show termwidth)
-  -- _ <- putStrLn "Term width: " ++ termwidth
+        -- _ <- putStrLn "Term width: " ++ termwidth
   let params =
         W.MkParams
           { W.target = target cmdFlags,
@@ -80,7 +80,7 @@ initializeAndRunPlot cmdFlags chan = do
 
       -- initial state with dummy data.
       -- TODO: latencies should be initialized as empty
-      
+
       initialState =
         AppState
           { _params = params,
@@ -102,7 +102,7 @@ initializeAndRunPlot cmdFlags chan = do
   -- TODO: this can be run in it's own thread as well.
   void $ M.customMainWithDefaultVty (Just bchan) plotApp initialState
 
-chanToBChanAdapter :: Chan  Models.AttackResultMessage -> BChan (Either Models.AttackResultMessage Float) -> IO ()
+chanToBChanAdapter :: Chan Models.AttackResultMessage -> BChan (Either Models.AttackResultMessage Float) -> IO ()
 chanToBChanAdapter inputChan outputBChan = loop
   where
     loop = do
@@ -114,6 +114,6 @@ tick :: Integer -> BChan (Either Models.AttackResultMessage Float) -> IO GHC.Con
 tick dur chan = forkIO $ go 0.0
   where
     go f = do
-      writeBChan chan (Right (f/ fromIntegral dur))
+      writeBChan chan (Right (f / fromIntegral dur))
       threadDelay 100000
       go (f + 0.1)

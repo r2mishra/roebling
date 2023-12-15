@@ -12,7 +12,6 @@ pace :: UTCTime -> Int -> PaceConfig -> IO PacerResult
 pace began hitCount config = do
   now <- getCurrentTime
   let elapsed = now `diffUTCTime` began
-  -- print $ "Elapsed: " ++ show elapsed
   if elapsed >= duration config
     then return PacerResult {stop = True, waitTime = 0}
     else do

@@ -39,7 +39,6 @@ myBytes =
 myErrors :: Errors
 myErrors = MkErrors {errors = fromList []}
 
-
 myStatusCodes :: StatusCodes
 myStatusCodes = MkStatusCodes {statusCodes = M.fromList []}
 
