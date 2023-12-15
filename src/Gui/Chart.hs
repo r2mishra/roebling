@@ -56,6 +56,8 @@ import Data.Time.Clock (diffUTCTime)
 import System.Exit (exitSuccess)
 import Lens.Micro ((^.), (&), (.~), to)
 import Graphics.Vty (horizCat)
+import Brick (put)
+import GHC.Arr (newSTArray)
 
 
 appendDebugLog :: String -> IO ()
@@ -169,7 +171,8 @@ data AppState = AppState
     _reqErrors :: W.Errors,
     _otherstats :: W.OtherStats,
     _pbState :: Float,
-    _numSuccess :: Int -- num of successful requests (200)
+    _numSuccess :: Int, -- num of successful requests (200)
+    _seqs :: [Int]
     -- Include other fields as necessary
   }
 
@@ -358,6 +361,10 @@ handleEvent e = case e of
     numDone += 1
     numDone' <- use numDone
 
+    let newSeq = Utils.Models.seq newAttackResult
+
+    liftIO $ putStrLn $ "hitCount: " ++ show (Utils.Models.seq newAttackResult) ++ " numDone: " ++ show numDone' ++ "\n"
+
     Control.Monad.when (code newAttackResult == 200) $ numSuccess += 1
 
     numSuccess' <- use numSuccess
@@ -369,7 +376,7 @@ handleEvent e = case e of
     let newCode = show (code newAttackResult)
      in statusCodes %= \x -> updateStatusCode x newCode
 
-    otherstats %= updateOtherStats numDone' numSuccess' newAttackResult
+    otherstats %= updateOtherStats numDone' numSuccess' newSeq newAttackResult
 
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
@@ -395,8 +402,8 @@ updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
     }
 
 
-updateOtherStats :: Int -> Int -> AttackResult -> OtherStats -> OtherStats
-updateOtherStats numHits numSuccess result oldStats =
+updateOtherStats :: Int -> Int -> Int -> AttackResult -> OtherStats -> OtherStats
+updateOtherStats numHits numSuccess newSeq result oldStats =
   oldStats
     { requests = numHits
     , success = fromIntegral numSuccess / fromIntegral numHits
@@ -404,12 +411,14 @@ updateOtherStats numHits numSuccess result oldStats =
     , latest = Utils.Models.requestTimestamp result
     , end = Utils.Models.responseTimestamp result
     , throughput = fromIntegral numSuccess / realToFrac (diffUTCTime latest earliest)
+    , seqIds = newSeqs
     }
   where
     earliest = if numHits == 1
                then Utils.Models.requestTimestamp result
                else W.earliest oldStats
     latest  = Utils.Models.responseTimestamp result
+    newSeqs = seqIds oldStats ++  [Utils.Models.seq result]
 
 
 updateStatusCode :: W.StatusCodes -> String -> W.StatusCodes

@@ -179,7 +179,8 @@ data OtherStats = MkOtherStats
     -- | Latest is the latest timestamp of a request
     latest :: UTCTime,
     -- | End is the latest timestamp of a response i.e `latest` + request latency
-    end :: UTCTime
+    end :: UTCTime,
+    seqIds :: [Int]
   }
 
 instance Show OtherStats where
@@ -192,7 +193,8 @@ instance Show OtherStats where
         "Success: " ++ show (success os),
         "Earliest: " ++ show (earliest os),
         "Latest: " ++ show (latest os),
-        "End: " ++ show (end os)
+        "End: " ++ show (end os),
+        "Seq Ids" ++ show (seqIds os)
       ]
 --   withBorderStyle unicode $
 -- borderWithLabel (str "OtherStats") $

@@ -14,7 +14,7 @@ run:
 dev:
 	hpack
 	cabal build
-	cabal run roebling-exe  -- --method GET http://localhost:8000/slow --rate 20 --duration 30
+	cabal run roebling-exe  -- --method GET http://localhost:8000/slow --rate 2 --duration 10
 
 fmt:
 	find . -name '*.hs' | xargs ormolu --mode inplace

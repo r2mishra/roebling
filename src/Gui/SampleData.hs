@@ -52,7 +52,8 @@ myOtherStats =
       -- TODO: Update the dummy times to real times
       earliest = dummyUTCTime,
       latest = dummyUTCTime,
-      end = dummyUTCTime
+      end = dummyUTCTime,
+      seqIds = []
     }
 
 generateRandomDouble :: IO Double

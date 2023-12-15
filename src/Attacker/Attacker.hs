@@ -14,6 +14,7 @@ import Data.Time
 import Network.HTTP.Conduit
 import Network.HTTP.Types
 import Utils.Models
+import Brick (put)
 
 attacker :: Request -> Manager -> Int -> IO AttackResult
 attacker requestObj manager hitCount = do
@@ -45,6 +46,7 @@ runAttacker channel target config = do
               threadDelay (floor $ shouldWaitTime * 1000000)
             _ <- async $ do
               msg <- attacker targetRequest manager hitCount
+              putStrLn $ "Writing to channel : " ++ (show hitCount)
               writeChan channel $ ResultMessage msg
             loop (hitCount + 1)
   loop 0
