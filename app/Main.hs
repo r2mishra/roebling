@@ -21,7 +21,6 @@ import qualified GUI.Widgets as W
 import Options.Applicative
 import System.IO
 import qualified Utils.Models as Models
-import Control.Monad.IO.Class (liftIO)
 
 main :: IO ()
 main = do
@@ -36,12 +35,14 @@ main = do
 
   attackerThread <- async $ runAttacker attackChannel targetter pacer
 
+  -- TODO: this should read AND write back entries into the channel
   -- appendFile "results.log" ("Log for attacking url:" ++ (show (Args.target cmdFlags)) ++ "\n")
   -- fetcherThread <- async $ runLogger "results.log" attackChannel
 
   initializeAndRunPlot cmdFlags attackChannel
   wait attackerThread
-  -- wait fetcherThread
+
+-- wait fetcherThread
 
 buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =
@@ -60,7 +61,7 @@ buildPacer cmdFlags =
       Pacer.duration = fromIntegral (Args.duration cmdFlags)
     }
 
--- Implement the logic to read from the channel and update the graph
+-- | Implement the logic to read from the channel and update the graph
 initializeAndRunPlot :: Flags -> Chan Models.AttackResultMessage -> IO ()
 initializeAndRunPlot cmdFlags chan = do
   let params =
@@ -84,13 +85,11 @@ initializeAndRunPlot cmdFlags chan = do
             _hitCount = (duration cmdFlags) * (rate cmdFlags),
             _pbState = 0.0,
             _numSuccess = 0
-
           }
   bchan <- newBChan 10000
   -- updates latencies in a new thread
   _ <- forkIO $ chanToBChanAdapter chan bchan
   _ <- tick (fromIntegral (duration cmdFlags)) bchan
-  -- TODO: this can be run in it's own thread as well.
   void $ M.customMainWithDefaultVty (Just bchan) plotApp initialState
 
 chanToBChanAdapter :: Chan Models.AttackResultMessage -> BChan (Either Models.AttackResultMessage Float) -> IO ()
