@@ -51,9 +51,9 @@ import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import System.Console.Terminal.Size (size, width)
-import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf (printf)
 import Utils.Models
+import Data.Time.Clock (diffUTCTime)
 
 appendDebugLog :: String -> IO ()
 appendDebugLog msg = appendFile "debug.log" (msg ++ "\n")
@@ -348,7 +348,6 @@ handleEvent e = case e of
     let newCode = show (code newAttackResult)
      in statusCodes %= \x -> updateStatusCode x newCode
 
-
     otherstats %= updateOtherStats numDone' numSuccess' newAttackResult
 
     case Utils.Models.error newAttackResult of
@@ -372,10 +371,23 @@ updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
           }
     }
 
-updateOtherStats :: Int -> Int -> AttackResult -> W.OtherStats -> W.OtherStats
-updateOtherStats numHits numSuccess result oldStats = oldStats {requests = fromIntegral numHits, success =  fromIntegral numSuccess / fromIntegral numHits, earliest = earliest, latest = Utils.Models.responseTimestamp result, end = Utils.Models.responseTimestamp result }
-  where 
-    earliest = if numHits == 1 then Utils.Models.requestTimestamp result else W.earliest oldStats
+
+updateOtherStats :: Int -> Int -> AttackResult -> OtherStats -> OtherStats
+updateOtherStats numHits numSuccess result oldStats =
+  oldStats
+    { requests = numHits
+    , success = fromIntegral numSuccess / fromIntegral numHits
+    , earliest = earliest
+    , latest = Utils.Models.requestTimestamp result
+    , end = Utils.Models.responseTimestamp result
+    , throughput = fromIntegral numSuccess / realToFrac (diffUTCTime latest earliest)
+    }
+  where
+    earliest = if numHits == 1
+               then Utils.Models.requestTimestamp result
+               else W.earliest oldStats
+    latest  = Utils.Models.responseTimestamp result
+
 
 updateStatusCode :: W.StatusCodes -> String -> W.StatusCodes
 updateStatusCode (W.MkStatusCodes codes) key = W.MkStatusCodes updatedCodes

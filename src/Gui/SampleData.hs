@@ -45,7 +45,7 @@ myStatusCodes = MkStatusCodes {statusCodes = M.fromList [("200", 0)]}
 myOtherStats :: OtherStats
 myOtherStats =
   MkOtherStats
-    { wait = 1,
+    { 
       requests = 10,
       throughput = 2.0,
       success = 0.5,
