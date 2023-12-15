@@ -349,7 +349,7 @@ handleEvent e = case e of
      in statusCodes %= \x -> updateStatusCode x newCode
 
 
-    otherstats %= updateOtherStats numDone' numSuccess'
+    otherstats %= updateOtherStats numDone' numSuccess' newAttackResult
 
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
@@ -372,8 +372,10 @@ updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
           }
     }
 
-updateOtherStats :: Int -> Int -> W.OtherStats -> W.OtherStats
-updateOtherStats numHits numSuccess oldStats = oldStats {requests = fromIntegral numHits, success =  fromIntegral numSuccess / fromIntegral numHits }
+updateOtherStats :: Int -> Int -> AttackResult -> W.OtherStats -> W.OtherStats
+updateOtherStats numHits numSuccess result oldStats = oldStats {requests = fromIntegral numHits, success =  fromIntegral numSuccess / fromIntegral numHits, earliest = earliest, latest = Utils.Models.responseTimestamp result, end = Utils.Models.responseTimestamp result }
+  where 
+    earliest = if numHits == 1 then Utils.Models.requestTimestamp result else W.earliest oldStats
 
 updateStatusCode :: W.StatusCodes -> String -> W.StatusCodes
 updateStatusCode (W.MkStatusCodes codes) key = W.MkStatusCodes updatedCodes
