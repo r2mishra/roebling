@@ -47,6 +47,8 @@ dependencies:
 - tasty-hunit
 - network-uri
 - directory
+- microlens
+- terminal-size
 ghc-options:
 - -Wall
 - -Wcompat

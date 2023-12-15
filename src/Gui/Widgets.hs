@@ -5,6 +5,11 @@ module GUI.Widgets where
 
 import Attacker.Attacker
 import Brick
+import qualified Brick.BorderMap
+import Brick.Widgets.Border
+import Brick.Widgets.Border.Style (unicode)
+import qualified Brick.Widgets.Border.Style as BS
+import Brick.Widgets.Core (textWidth)
 import qualified Brick.AttrMap as A
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)
@@ -18,6 +23,8 @@ import Data.Text (Text)
 import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
+import qualified Graphics.Vty
+import Lens.Micro ((^.))
 import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
@@ -25,6 +32,7 @@ import qualified Graphics.Vty as V
 import Attacker.Attacker
 import Network.URI (URI)
 import Utils.Models (AttackResult (..), AttackResultMessage (..))
+import Text.Printf (printf)
 
 -- | Params is the set of attack parameters
 data Params = MkParams
@@ -38,24 +46,27 @@ data Params = MkParams
     method :: Text
   }
 
+-- a :: Int
+-- a = textWidth ("fasas" :: String)
+
 -- TODO: Add centering to make sure latency plot occupies the full width
 drawLatencyStats :: [NominalDiffTime] -> Widget ()
 drawLatencyStats latencies =
   withBorderStyle unicode $
-    borderWithLabel (str "Latencies") $
+    borderWithLabel (str "Latency Stats(s)") $
       Brick.str (formatStats latencies)
 
 formatStats :: [NominalDiffTime] -> String
 formatStats latencies =
   unlines
-    [ "Total: " ++ show totalL,
-      "Mean: " ++ show meanL,
-      "P50: " ++ show p50,
-      "P90: " ++ show p90,
-      "P95: " ++ show p95,
-      "P99: " ++ show p99,
-      "Max: " ++ show maxL,
-      "Min: " ++ show minL
+    [ "Total: " ++ printf "%0.4f" totalL :: String,
+      "Mean: " ++ printf "%0.4f" meanL,
+      "P50: " ++ printf "%0.4f" p50,
+      "P90: " ++ printf "%0.4f" p90,
+      "P95: " ++ printf "%0.4f" p95,
+      "P99: " ++ printf "%0.4f" p99,
+      "Max: " ++ printf "%0.4f" maxL,
+      "Min: " ++ printf "%0.4f" minL
     ]
   where
     (totalL, meanL, p50, p90, p95, p99, maxL, minL) = getLatencyStats latencies
