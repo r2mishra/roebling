@@ -372,8 +372,11 @@ handleEvent e = case e of
     otherstats %= updateOtherStats numDone' numSuccess' newAttackResult
 
     case Utils.Models.error newAttackResult of
-      Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
+      Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert withoutQuotes e)
+        where
+          withoutQuotes = filter (/= '"') err
       Nothing -> return ()
+
   (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> do
     M.halt
     liftIO exitSuccess
