@@ -31,7 +31,6 @@ library
       Attacker.ResultLogger
       Attacker.Targeter
       GUI.Chart
-      GUI.ProgressBar
       GUI.SampleData
       GUI.Widgets
       Utils.Duration
