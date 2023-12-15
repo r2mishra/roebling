@@ -16,6 +16,7 @@ import Control.Concurrent.Async (withAsync)
 import Control.Concurrent.Chan (Chan, newChan, readChan, writeChan)
 import System.Directory (removeFile)
 import Control.Concurrent (threadDelay)
+import Data.Time
 
 testRunLogger :: Assertion
 testRunLogger = do
@@ -23,9 +24,11 @@ testRunLogger = do
 
   let testFileName = "test_result.log"
 
-  loggerThreadId <- forkIO $ R.runLogger testFileName channel
+  _ <- forkIO $ R.runLogger testFileName channel
 
-  writeChan channel (M.ResultMessage (M.AttackResult 10 200 50 (Just "No Error") 100 150))
+  dummyUTCTime <- getCurrentTime
+
+  writeChan channel (M.ResultMessage (M.AttackResult 10 200 50 (Just "No Error") 100 150 dummyUTCTime dummyUTCTime))
 
   threadDelay 1000000 
 
@@ -38,6 +41,3 @@ testRunLogger = do
 
 resultLoggerTests :: TestTree
 resultLoggerTests = testGroup "ResultLogger Tests" [testCase "runLogger" testRunLogger]
-
-handler :: SomeException -> IO ()
-handler _ = return ()

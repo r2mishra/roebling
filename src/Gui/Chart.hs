@@ -193,7 +193,7 @@ theMap =
   Brick.AttrMap.attrMap
     V.defAttr
     [ (theBaseAttr, bg V.brightBlack),
-      (xDoneAttr, V.green `on` V.green),
+      (xDoneAttr, V.black `on` V.green),
       (xToDoAttr, V.white `on` V.black),
       (P.progressIncompleteAttr, fg V.black)
     ]

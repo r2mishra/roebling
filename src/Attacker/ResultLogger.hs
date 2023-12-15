@@ -18,6 +18,6 @@ runLogger fn channel = loop
     loop = do
       maybeMsg <- timeout (5 * 1000000) (readChan channel) -- 5 seconds timeout (microseconds)
       Control.Monad.when (isJust maybeMsg) $ do
-        let ResultMessage (AttackResult hitCount code latency error bytesIn bytesOut) = fromJust maybeMsg
-        appendFile fn ("Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency ++ ", Error: " ++ show error ++ ", Bytes In: " ++ show bytesIn ++ ", Bytes Out: " ++ show bytesOut ++ "\n")
+        let ResultMessage (AttackResult hitCount code latency error bytesIn bytesOut requestTimestamp responseTimestamp) = fromJust maybeMsg
+        appendFile fn ("Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency ++ ", Error: " ++ show error ++ ", Bytes In: " ++ show bytesIn ++ ", Bytes Out: " ++ show bytesOut ++ ", Request Timestamp: " ++ show requestTimestamp ++ ", Response Timestamp: " ++ show responseTimestamp ++ "\n")
         loop
