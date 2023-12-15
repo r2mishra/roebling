@@ -19,7 +19,6 @@ import GUI.Chart
 import GUI.SampleData
 import qualified GUI.Widgets as W
 import Options.Applicative
-import System.Console.Terminal.Size (size, width)
 import System.IO
 import qualified Utils.Models as Models
 
@@ -66,12 +65,6 @@ buildPacer cmdFlags =
 -- Implement the logic to read from the channel and update the graph
 initializeAndRunPlot :: Flags -> Chan Models.AttackResultMessage -> IO ()
 initializeAndRunPlot cmdFlags chan = do
-  -- get terminal width
-  maybeTermWidth <- size
-  let termwidth = case maybeTermWidth of
-        Just windowsize -> width windowsize
-        Nothing -> 80 -- a random default
-        -- _ <- putStrLn "Term width: " ++ termwidth
   let params =
         W.MkParams
           { W.target = target cmdFlags,
@@ -94,7 +87,6 @@ initializeAndRunPlot cmdFlags chan = do
             _otherstats = myOtherStats,
             _numDone = 0,
             _hitCount = (duration cmdFlags) * (rate cmdFlags),
-            _termwidth = termwidth,
             _pbState = 0.0
           }
   bchan <- newBChan 100

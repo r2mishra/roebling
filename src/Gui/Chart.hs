@@ -66,11 +66,6 @@ data Options = MkOptions
     height :: Int
   }
 
--- -- | Provides default options: @Options { 'height' = 14 }@.
--- options :: Options
--- options =
---   MkOptions {height = 14}
-
 newArray2D ::
   Integer ->
   Integer ->
@@ -167,7 +162,6 @@ data AppState = AppState
   { _latencies :: [NominalDiffTime],
     _numDone :: Int, -- current progress
     _hitCount :: Int, -- total number needed
-    _termwidth :: Int,
     _bytesMetrics :: BytesWidget,
     _plotOptions :: Options,
     _params :: W.Params,
@@ -221,8 +215,8 @@ xToDoAttr = theBaseAttr <> Brick.AttrMap.attrName "X:remaining"
 --         str (unlines $ getPlotLines myoptions mylatencies)
 
 -- BIGGEST HEADACHE
-myFillPlotWidget :: Int -> Options -> [Double] -> T.Widget n
-myFillPlotWidget term_width myoptions mylatencies =
+myFillPlotWidget :: Options -> [Double] -> T.Widget n
+myFillPlotWidget myoptions mylatencies =
   joinBorders $
     withBorderStyle
       unicode
@@ -234,17 +228,18 @@ myFillPlotWidget term_width myoptions mylatencies =
     internalWidget = T.Widget T.Greedy T.Greedy $ do
       ctx <- T.getContext
       let a = ctx ^. (T.attrL)
-      let curWidth = round (0.1 * fromIntegral term_width)
+      -- c <- T.getContext
+      let fullWidth =  (ctx^.T.availWidthL)
+      let curWidth = round (0.6 * fromIntegral fullWidth) -- more conservative to see updates quickly
       let cur_strings = getPlotLines myoptions mylatencies
       let cur_string_width = textWidth (head cur_strings)
-      let newLatencies =
-            if cur_string_width > curWidth
+      let newLatencies = if cur_string_width > curWidth
               then resizeStringList mylatencies cur_string_width curWidth
               else mylatencies
       let max_num_width = length (printf "%0.2f" (realToFrac $ maximum mylatencies :: Float) :: String)
-      -- let newStrings = [keepLabelAndLastN' max_num_width curWidth x | x <- cur_strings] -- this is working. updating latencies isn't (??)
       let newStrings = getPlotLines myoptions newLatencies
-      let plotLines = map TL.pack newStrings
+      let bottomString = concat $ replicate fullWidth "-"
+      let plotLines = map TL.pack (newStrings ++ [bottomString])
       let image = V.vertCat $ map (V.text V.defAttr) plotLines
       return $
         T.Result
@@ -261,13 +256,9 @@ keepLabelAndLastN' skipNum n xs = (take skipNum xs) ++ (lastN' n (lastN' (length
 -- [1,2,3]
 
 resizeStringList :: [Double] -> Int -> Int -> [Double]
--- resizeStringList mylatencies cur_string_width curWidth = downsample frac mylatencies
---     where frac = fromIntegral curWidth / fromIntegral cur_string_width
 resizeStringList mylatencies cur_string_width curWidth = lastN' subN mylatencies
   where
-    subN = round (fromIntegral (length mylatencies) * 0.9)
-
--- subN = round (fromIntegral (length mylatencies) * (fromIntegral curWidth / fromIntegral cur_string_width))
+    subN = round (fromIntegral (length mylatencies) * (fromIntegral curWidth / fromIntegral cur_string_width))
 
 lastN' :: Int -> [a] -> [a]
 lastN' n xs = foldl' (const . drop 1) xs (drop n xs)
@@ -276,8 +267,7 @@ lastN' n xs = foldl' (const . drop 1) xs (drop n xs)
 drawUI :: AppState -> [T.Widget ()]
 drawUI state = [go]
   where
-    go = ui mytermwidth myparams myoptions mylatencies mybytes mystatuscodes myerrors myotherstats myprogressbar
-    mytermwidth = _termwidth state
+    go = ui myparams myoptions mylatencies mybytes mystatuscodes myerrors myotherstats myprogressbar
     myparams = _params state
     myoptions = _plotOptions state
     mylatencies = _latencies state
@@ -288,10 +278,10 @@ drawUI state = [go]
     myprogressbar = _pbState state
 
 -- The UI widget that includes the ASCII chart
-ui :: Int -> W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
-ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
+ui ::  W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
+ui myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
   vBox
-    [ myFillPlotWidget termwidth myoptions (map realToFrac mylatencies :: [Double]),
+    [ myFillPlotWidget myoptions (map realToFrac mylatencies :: [Double]),
       fillWidgetsEvenly myparams mylatencies bytes statuscodes errors myotherstats,
       hBox
         [ W.drawProgressBar myprogressbarstate,
