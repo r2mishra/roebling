@@ -53,8 +53,10 @@ import Lens.Micro.TH (makeLenses)
 import System.Console.Terminal.Size (size, width)
 import System.Exit (exitSuccess)
 import System.IO.Unsafe (unsafePerformIO)
+import Lens.Micro ((^.), (&), (.~), to)
 import Text.Printf (printf)
 import Utils.Models
+import Graphics.Vty (horizCat)
 
 appendDebugLog :: String -> IO ()
 appendDebugLog msg = appendFile "debug.log" (msg ++ "\n")
@@ -270,24 +272,6 @@ resizeStringList mylatencies cur_string_width curWidth = lastN' subN mylatencies
 lastN' :: Int -> [a] -> [a]
 lastN' n xs = foldl' (const . drop 1) xs (drop n xs)
 
--- assert :: Bool -> a -> a
--- assert False x = error "assertion failed!"
--- assert _ a = a
-
--- NOT USED RN
-downsample :: (RealFrac a) => a -> [b] -> [b]
-downsample frac lst
-  | frac >= 1 = lst
-  | otherwise = go 0 0
-  where
-    len = fromIntegral $ length lst
-    num_out = max (round (len * frac)) 1
-    step = round (len / fromIntegral num_out)
-    go i n
-      | i >= length lst = []
-      | n <= i = lst !! i : go (i + 1) (n + step)
-      | otherwise = go (i + 1) n
-
 -- | Final combined UI with all the Widgets
 drawUI :: AppState -> [T.Widget ()]
 drawUI state = [go]
@@ -308,21 +292,67 @@ ui :: Int -> W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.Stat
 ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
   vBox
     [ myFillPlotWidget termwidth myoptions (map realToFrac mylatencies :: [Double]),
-      hBox
-        [ W.drawParams myparams,
-          W.drawLatencyStats mylatencies,
-          W.drawBytes bytes,
-          vBox
-            [ W.drawStatusCodes statuscodes,
-              W.drawErrors errors
-            ],
-          W.drawOtherStats myotherstats
-        ],
+      fillWidgetsEvenly myparams mylatencies bytes statuscodes errors myotherstats,
       hBox
         [ W.drawProgressBar myprogressbarstate,
           W.drawLegend
         ]
     ]
+
+fillWidgetsEvenly :: W.Params -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes  -> W.Errors -> W.OtherStats -> T.Widget ()
+fillWidgetsEvenly myparams mylatencies bytes statuscodes errors myotherstats =
+   (T.Widget T.Greedy T.Greedy $ do
+                -- Compute translation offset so that loc is in the middle of the
+                -- rendering area
+                c <- T.getContext
+                let fullWidth = c^.T.availWidthL
+                    fullHeight = c^.T.availHeightL
+                let indWidth = fullWidth
+                let getrightPaddingAmt result maxWidth = max 0 $ maxWidth - V.imageWidth (result^.T.imageL)
+                let getBottomPaddingAmt result maxHeight = max 0 $ maxHeight - V.imageHeight (result^.T.imageL)
+                let getRightPadding result maxWidth = V.charFill (c^.T.attrL) ' ' (getrightPaddingAmt result maxWidth) (V.imageHeight $ result^.T.imageL) 
+                let getPaddedImg result maxWidth = horizCat [result^.T.imageL, getRightPadding result maxWidth]
+                curResult <- T.render $ (hBox
+                  [ W.drawBorder "Params" $  W.drawParams myparams,
+                     W.drawBorder "Params" $ W.drawLatencyStats mylatencies,
+                     W.drawBorder "Params" $ W.drawBytes bytes,
+                    vBox
+                      [ W.drawBorder "Params" $  W.drawStatusCodes statuscodes,
+                         W.drawBorder "Params" $ W.drawErrors errors
+                      ],
+                    W.drawBorder "Params" $  W.drawOtherStats myotherstats
+                  ]
+                  )
+                let curHeight =  V.imageHeight (curResult^.T.imageL)
+                let equalPad = getrightPaddingAmt curResult indWidth `div` 5
+                latencyResult <- T.render $  W.drawLatencyStats mylatencies
+                paramResult <- T.render $ W.drawParams myparams
+                bytesResult <- T.render $ W.drawBytes bytes
+                errorAndStatResult <- T.render $ vBox
+                      [ W.drawStatusCodes statuscodes,
+                        W.drawBorder "Errors" $ W.drawErrors errors
+                      ]
+                errorResult <- T.render $ W.drawErrors errors
+                let errorRightPad = (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (errorResult^.T.imageL)) + equalPad
+                otherResult <- T.render $ W.drawOtherStats myotherstats
+                let paramBottomPad = getBottomPaddingAmt paramResult curHeight
+                let latencyBottomPad = getBottomPaddingAmt latencyResult curHeight
+                let bytesBottomPad = getBottomPaddingAmt bytesResult curHeight
+                let errorBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) `div` 2
+                let statCodeBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) `div` 2
+                let otherBottomPad = (getBottomPaddingAmt otherResult curHeight) 
+                fullResult <- T.render $ (hBox [
+                    W.drawBorder "Params" $ padBottom (Pad paramBottomPad) $ padRight (Pad equalPad) $ W.drawParams myparams,
+                    W.drawBorder "Latency Stats(s)" $ padBottom (Pad latencyBottomPad) $ padRight (Pad equalPad) $ W.drawLatencyStats mylatencies,
+                    W.drawBorder "Bytes" $ padBottom (Pad bytesBottomPad) $ padRight (Pad equalPad) $ W.drawBytes bytes,
+                    vBox
+                      [ W.drawBorder "Status Codes" $ padBottom (Pad statCodeBottomPad) $ padRight (Pad equalPad) $ W.drawStatusCodes statuscodes,
+                        W.drawBorder "Errors" $ padBottom (Pad errorBottomPad) $  padRight (Pad errorRightPad) $ W.drawErrors errors
+                      ],
+                      W.drawBorder "Other Stats" $ padBottom (Pad otherBottomPad) $ padRight Max $ W.drawOtherStats myotherstats
+                  ])
+                return (fullResult)
+    )
 
 -- TODO: Currently, an event is either a keyboard entry or a list of latencies. This should include other data like OtherStats, etc.
 handleEvent :: T.BrickEvent Name (Either Utils.Models.AttackResultMessage Float) -> T.EventM Name AppState ()

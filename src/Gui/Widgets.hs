@@ -15,7 +15,7 @@ import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent (Chan, readChan)
 import Data.List (sort)
 import qualified Data.Map as M
-import Data.Set (Set, toList)
+import Data.Set (Set, toList, size)
 import Data.Text (Text)
 import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
@@ -44,17 +44,18 @@ data Params = MkParams
 -- a :: Int
 -- a = textWidth ("fasas" :: String)
 
+--  withBorderStyle unicode $
+-- borderWithLabel (str "Latency Stats(s)") $
+
 -- TODO: Add centering to make sure latency plot occupies the full width
 drawLatencyStats :: [NominalDiffTime] -> Widget ()
 drawLatencyStats latencies =
-  withBorderStyle unicode $
-    borderWithLabel (str "Latency Stats(s)") $
       Brick.str (formatStats latencies)
 
 formatStats :: [NominalDiffTime] -> String
 formatStats latencies =
   unlines
-    [ "Total: " ++ printf "%0.4f" totalL :: String,
+    [ "Total: " ++ (printf "%0.4f" totalL :: String) ++ (concat $ replicate 10 " "), -- add some padding here
       "Mean: " ++ printf "%0.4f" meanL,
       "P50: " ++ printf "%0.4f" p50,
       "P90: " ++ printf "%0.4f" p90,
@@ -106,11 +107,10 @@ instance Show Params where
         "Duration: " ++ show (duration paramstext),
         "Method: " ++ show (method paramstext)
       ]
-
+--   withBorderStyle unicode $
+-- borderWithLabel (str "Params") $
 drawParams :: Params -> Widget ()
 drawParams p =
-  withBorderStyle unicode $
-    borderWithLabel (str "Params") $
       Brick.str (show p)
 
 data BytesMetrics = MkBytesMetrics
@@ -134,32 +134,36 @@ instance Show BytesWidget where
         "  Total: " ++ show (totalB $ outMetrics b),
         "  Mean: " ++ printf "%0.4f" (meanB $ outMetrics b)
       ]
-
+--   withBorderStyle unicode $ borderWithLabel (str "Bytes") $
 drawBytes :: BytesWidget -> Widget ()
 drawBytes b =
-  withBorderStyle unicode $
-    borderWithLabel (str "Bytes") $
       Brick.str (show b)
 
 newtype StatusCodes = MkStatusCodes
   { statusCodes :: M.Map String Int
   }
 
+padR :: Int -> String -> String
+padR n s
+    | length s < n  = s ++ replicate (n - length s) ' '
+    | otherwise     = s
+
 instance Show StatusCodes where
   show :: StatusCodes -> String
-  show s = unlines $ map (\(k, v) -> show k ++ ": " ++ show v) (M.toList codes)
+  -- pad to atleast 15 characters
+  show s = unlines $ map (\(k, v) -> padR 1 (show k ++ ": " ++ show v) ) (M.toList codes)
     where
       codes = statusCodes s
+
+drawBorder :: String -> Widget () -> Widget ()
+drawBorder label widget = withBorderStyle unicode $
+      borderWithLabel (str label) $ widget
 
 -- TODO: Resize to make the full widget Label appear
 drawStatusCodes :: StatusCodes -> Widget ()
 drawStatusCodes s =
-  hLimit width $
-    withBorderStyle unicode $
-      borderWithLabel (str "StatusCodes") $
-        Brick.str (show s)
-  where
-    width = 15
+    -- add some padding for status code
+        Brick.str (if ((M.size $ statusCodes s) > 0) then show s else ".")
 
 -- | Other important statistics for the attack such as throughput, success rate, etc
 data OtherStats = MkOtherStats
@@ -191,11 +195,10 @@ instance Show OtherStats where
         "Latest: " ++ show (latest os),
         "End: " ++ show (end os)
       ]
-
+--   withBorderStyle unicode $
+-- borderWithLabel (str "OtherStats") $
 drawOtherStats :: OtherStats -> Widget ()
 drawOtherStats os =
-  withBorderStyle unicode $
-    borderWithLabel (str "OtherStats") $
       Brick.str (show os)
 
 -- | Errors is the set of unique errors returned by the target server
@@ -207,11 +210,11 @@ instance Show Errors where
   show :: Errors -> String
   show e = unlines $ map show (toList $ errors e)
 
+---   withBorderStyle unicode $
+-- borderWithLabel (str "Errors") $
 drawErrors :: Errors -> Widget ()
 drawErrors e =
-  withBorderStyle unicode $
-    borderWithLabel (str "Errors") $
-      Brick.str (show e)
+      Brick.str (if ((size $ errors e) > 0 ) then show e else ".")
 
 drawProgressBar :: Float -> Widget ()
 drawProgressBar p = hLimitPercent 65 ui
@@ -249,7 +252,6 @@ theMap =
 
 drawLegend :: Widget ()
 drawLegend =
-  hLimit 30 $
     withBorderStyle unicode $
-      borderWithLabel (str "Legend") $
+      borderWithLabel (str "Legend") $ padRight Max $
         Brick.str "q: Quit"
