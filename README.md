@@ -2,17 +2,12 @@
 
 A command-line based load testing tool in Haskell that can plot metrics related to latency, request statuses, etc in real time. A minimalistic Haskell implementation of [ali](https://github.com/nakabonne/ali).
 
-# Group Members
-- Sumanth R Hegde
-- Rohan Mishra
-- Raj Nawal
-- Om Prakaash
-
 # Features
-- Latency Metrics
-- Pace requests at a user-specified rate
-- Load Testing/Sudden spikes
-- Simulate multiple users
+- Pace requests at user-specified rate.
+- Support for different request methods, incl. POST with a request body.
+- Real-time Latency plot.
+- Networking metrics like bytes transferred, latency percentiles, etc.
+
 
 # Design
 - Parse command-line options
@@ -51,6 +46,11 @@ cabal run roebling-exe  -- --method GET http://www.github.com/ --rate 20 --durat
 
 Head over to [SETUP.md](/SETUP.md) for instructions on build management and running the server with Makefile shorthands. 
 
+# Contributors
+- Sumanth R Hegde
+- Rohan Mishra
+- Raj Nawal
+- Om Prakaash
 
 # References
 - [Ali](https://github.com/nakabonne/ali) - Reference load testing library implemented in Go
