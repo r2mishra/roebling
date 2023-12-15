@@ -324,20 +324,22 @@ fillWidgetsEvenly myparams mylatencies bytes statuscodes errors myotherstats =
                         W.drawBorder "Errors" $ W.drawErrors errors
                       ]
                 errorResult <- T.render $ W.drawErrors errors
-                let errorRightPad = (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (errorResult^.T.imageL)) + equalPad
+                statResult <- T.render $ W.drawStatusCodes statuscodes
+                let errorRightPad = (max (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (errorResult^.T.imageL)) 0) + equalPad
+                let statRightPad = (max (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (statResult^.T.imageL)) 0) + equalPad
                 otherResult <- T.render $ W.drawOtherStats myotherstats
                 let paramBottomPad = getBottomPaddingAmt paramResult curHeight
                 let latencyBottomPad = getBottomPaddingAmt latencyResult curHeight
                 let bytesBottomPad = getBottomPaddingAmt bytesResult curHeight
                 let errorBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) `div` 2
-                let statCodeBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) `div` 2
+                let statCodeBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) - errorBottomPad
                 let otherBottomPad = (getBottomPaddingAmt otherResult curHeight) 
                 fullResult <- T.render $ (hBox [
                     W.drawBorder "Params" $ padBottom (Pad paramBottomPad) $ padRight (Pad equalPad) $ W.drawParams myparams,
                     W.drawBorder "Latency Stats(s)" $ padBottom (Pad latencyBottomPad) $ padRight (Pad equalPad) $ W.drawLatencyStats mylatencies,
                     W.drawBorder "Bytes" $ padBottom (Pad bytesBottomPad) $ padRight (Pad equalPad) $ W.drawBytes bytes,
                     vBox
-                      [ W.drawBorder "Status Codes" $ padBottom (Pad statCodeBottomPad) $ padRight (Pad equalPad) $ W.drawStatusCodes statuscodes,
+                      [ W.drawBorder "Status Codes" $ padBottom (Pad statCodeBottomPad) $ padRight (Pad statRightPad) $ W.drawStatusCodes statuscodes,
                         W.drawBorder "Errors" $ padBottom (Pad errorBottomPad) $  padRight (Pad errorRightPad) $ W.drawErrors errors
                       ],
                       W.drawBorder "Other Stats" $ padBottom (Pad otherBottomPad) $ padRight Max $ W.drawOtherStats myotherstats
