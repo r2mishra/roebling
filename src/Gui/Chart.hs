@@ -51,6 +51,7 @@ import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import System.Console.Terminal.Size (size, width)
+import System.Exit (exitSuccess)
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf (printf)
 import Utils.Models
@@ -327,7 +328,6 @@ ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstat
 handleEvent :: T.BrickEvent Name (Either Utils.Models.AttackResultMessage Float) -> T.EventM Name AppState ()
 handleEvent e = case e of
   (T.AppEvent (Right f)) -> do
-
     numDone' <- use numDone
     pbState %= (\_ -> if numDone' == 0 then 0 else min f 1.0)
   (T.AppEvent (Left (ResultMessage newAttackResult))) -> do
@@ -346,7 +346,9 @@ handleEvent e = case e of
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
       Nothing -> return ()
-  (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> M.halt
+  (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> do
+    M.halt
+    liftIO exitSuccess
   _ -> return ()
 
 updatedByteMetrics :: Integer -> Integer -> Int -> BytesWidget -> BytesWidget
