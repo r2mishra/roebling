@@ -36,12 +36,12 @@ main = do
 
   attackerThread <- async $ runAttacker attackChannel targetter pacer
 
-  appendFile "results.log" ("Log for attacking url:" ++ (show (Args.target cmdFlags)) ++ "\n")
-  fetcherThread <- async $ runLogger "results.log" attackChannel
+  -- appendFile "results.log" ("Log for attacking url:" ++ (show (Args.target cmdFlags)) ++ "\n")
+  -- fetcherThread <- async $ runLogger "results.log" attackChannel
 
   initializeAndRunPlot cmdFlags attackChannel
   wait attackerThread
-  wait fetcherThread
+  -- wait fetcherThread
 
 buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =
@@ -71,9 +71,6 @@ initializeAndRunPlot cmdFlags chan = do
             W.method = method cmdFlags
           }
 
-      -- initial state with dummy data.
-      -- TODO: latencies should be initialized as empty
-
       initialState =
         AppState
           { _params = params,
@@ -89,7 +86,7 @@ initializeAndRunPlot cmdFlags chan = do
             _numSuccess = 0
 
           }
-  bchan <- newBChan 100
+  bchan <- newBChan 10000
   -- updates latencies in a new thread
   _ <- forkIO $ chanToBChanAdapter chan bchan
   _ <- tick (fromIntegral (duration cmdFlags)) bchan
