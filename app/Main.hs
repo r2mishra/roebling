@@ -41,7 +41,6 @@ main = do
 
   attackerThread <- async $ runAttacker attackChannel targetter pacer
   -- fetcherThread <- async $ runLogger attackChannel
-
   initializeAndRunPlot cmdFlags attackChannel
   wait attackerThread
 
@@ -72,8 +71,7 @@ initializeAndRunPlot cmdFlags chan = do
   let termwidth = case maybeTermWidth of
         Just windowsize -> width windowsize
         Nothing -> 80 -- a random default
-  print ("Term width: " ++ show termwidth)
-  -- _ <- putStrLn "Term width: " ++ termwidth
+        -- _ <- putStrLn "Term width: " ++ termwidth
   let params =
         W.MkParams
           { W.target = target cmdFlags,

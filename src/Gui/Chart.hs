@@ -51,6 +51,7 @@ import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import System.Console.Terminal.Size (size, width)
+import System.Exit (exitSuccess)
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf (printf)
 import Utils.Models
@@ -345,7 +346,9 @@ handleEvent e = case e of
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
       Nothing -> return ()
-  (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> M.halt
+  (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> do
+    M.halt
+    liftIO exitSuccess
   _ -> return ()
 
 updatedByteMetrics :: Integer -> Integer -> Int -> BytesWidget -> BytesWidget
