@@ -68,6 +68,7 @@ formatStats latencies =
     (totalL, meanL, p50, p90, p95, p99, maxL, minL) = getLatencyStats latencies
 
 getLatencyStats :: [NominalDiffTime] -> (Double, Double, Double, Double, Double, Double, Double, Double)
+getLatencyStats [] = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 getLatencyStats latencies = (totalL, meanL, p50, p90, p95, p99, maxL, minL)
   where
     floatLats = map realToFrac latencies :: [Double]
