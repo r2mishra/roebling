@@ -83,6 +83,7 @@ pad series =
    in maximum $ length <$> toStr floats
 
 plotWith' :: Options -> [Double] -> [String]
+plotWith' _ [] = []
 plotWith' opts series =
   -- variables and functions
   let min' = minimum series
@@ -152,6 +153,7 @@ plotWith options' series =
 
 -- TODO: what's the magic 4 number used by asciichart?
 getPlotLines :: Options -> [Double] -> [String]
+getPlotLines _ [] = []
 getPlotLines options' series = map (dropWhileEnd isSpace . concat) result
   where
     result = splitEvery (length series + 4) $ plotWith' options' series
@@ -233,7 +235,7 @@ myFillPlotWidget myoptions mylatencies =
       let fullWidth =  (ctx^.T.availWidthL)
       let curWidth = round (0.6 * fromIntegral fullWidth) -- more conservative to see updates quickly
       let cur_strings = getPlotLines myoptions mylatencies
-      let cur_string_width = textWidth (head cur_strings)
+      let cur_string_width = if length cur_strings > 0 then textWidth (head cur_strings) else 0
       let newLatencies = if cur_string_width > curWidth
               then resizeStringList mylatencies cur_string_width curWidth
               else mylatencies
@@ -324,20 +326,22 @@ fillWidgetsEvenly myparams mylatencies bytes statuscodes errors myotherstats =
                         W.drawBorder "Errors" $ W.drawErrors errors
                       ]
                 errorResult <- T.render $ W.drawErrors errors
-                let errorRightPad = (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (errorResult^.T.imageL)) + equalPad
+                statResult <- T.render $ W.drawStatusCodes statuscodes
+                let errorRightPad = (max (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (errorResult^.T.imageL)) 0) + equalPad
+                let statRightPad = (max (V.imageWidth (errorAndStatResult^.T.imageL) - V.imageWidth (statResult^.T.imageL)) 0) + equalPad
                 otherResult <- T.render $ W.drawOtherStats myotherstats
                 let paramBottomPad = getBottomPaddingAmt paramResult curHeight
                 let latencyBottomPad = getBottomPaddingAmt latencyResult curHeight
                 let bytesBottomPad = getBottomPaddingAmt bytesResult curHeight
                 let errorBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) `div` 2
-                let statCodeBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) `div` 2
+                let statCodeBottomPad = (getBottomPaddingAmt errorAndStatResult curHeight) - errorBottomPad
                 let otherBottomPad = (getBottomPaddingAmt otherResult curHeight) 
                 fullResult <- T.render $ (hBox [
                     W.drawBorder "Params" $ padBottom (Pad paramBottomPad) $ padRight (Pad equalPad) $ W.drawParams myparams,
                     W.drawBorder "Latency Stats(s)" $ padBottom (Pad latencyBottomPad) $ padRight (Pad equalPad) $ W.drawLatencyStats mylatencies,
                     W.drawBorder "Bytes" $ padBottom (Pad bytesBottomPad) $ padRight (Pad equalPad) $ W.drawBytes bytes,
                     vBox
-                      [ W.drawBorder "Status Codes" $ padBottom (Pad statCodeBottomPad) $ padRight (Pad equalPad) $ W.drawStatusCodes statuscodes,
+                      [ W.drawBorder "Status Codes" $ padBottom (Pad statCodeBottomPad) $ padRight (Pad statRightPad) $ W.drawStatusCodes statuscodes,
                         W.drawBorder "Errors" $ padBottom (Pad errorBottomPad) $  padRight (Pad errorRightPad) $ W.drawErrors errors
                       ],
                       W.drawBorder "Other Stats" $ padBottom (Pad otherBottomPad) $ padRight Max $ W.drawOtherStats myotherstats
