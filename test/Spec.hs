@@ -20,7 +20,8 @@ tests =
           W.tests
         ],
       testGroup "Pacer Tests" [PacerTest.tests],
-      testGroup "Targeter Tests" [TargeterTest.tests]
+      testGroup "Targeter Tests" [TargeterTest.tests],
+      testGroup "ResultLogger Tests" [R.resultLoggerTests]
     ]
 
 main :: IO ()

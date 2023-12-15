@@ -19,17 +19,12 @@ import GUI.Chart
 import GUI.SampleData
 import qualified GUI.Widgets as W
 import Options.Applicative
-import System.Console.Terminal.Size (size, width)
 import System.IO
 import qualified Utils.Models as Models
-
--- Somewhere in your initialization code
-setupDebugLog :: IO ()
-setupDebugLog = writeFile "debug.log" "Starting Debug Log\n"
+import Control.Monad.IO.Class (liftIO)
 
 main :: IO ()
 main = do
-  setupDebugLog -- DEBUGGING
   cmdFlags <- execParser (info (helper <*> Args.flags) fullDesc)
 
   let targetter = buildTargetter cmdFlags
@@ -40,12 +35,13 @@ main = do
   _ <- getLine
 
   attackerThread <- async $ runAttacker attackChannel targetter pacer
-  -- fetcherThread <- async $ runLogger attackChannel
+
+  appendFile "results.log" ("Log for attacking url:" ++ (show (Args.target cmdFlags)) ++ "\n")
+  fetcherThread <- async $ runLogger "results.log" attackChannel
 
   initializeAndRunPlot cmdFlags attackChannel
   wait attackerThread
-
--- wait fetcherThread
+  wait fetcherThread
 
 buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =
@@ -67,13 +63,6 @@ buildPacer cmdFlags =
 -- Implement the logic to read from the channel and update the graph
 initializeAndRunPlot :: Flags -> Chan Models.AttackResultMessage -> IO ()
 initializeAndRunPlot cmdFlags chan = do
-  -- get terminal width
-  maybeTermWidth <- size
-  let termwidth = case maybeTermWidth of
-        Just windowsize -> width windowsize
-        Nothing -> 80 -- a random default
-  print ("Term width: " ++ show termwidth)
-  -- _ <- putStrLn "Term width: " ++ termwidth
   let params =
         W.MkParams
           { W.target = target cmdFlags,
@@ -99,6 +88,7 @@ initializeAndRunPlot cmdFlags chan = do
             _termwidth = termwidth,
             _pbState = 0.0,
             _numSuccess = 0
+
           }
   bchan <- newBChan 100
   -- updates latencies in a new thread

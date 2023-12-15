@@ -32,15 +32,15 @@ myoptions = MkOptions {height = 14}
 myBytes :: BytesWidget
 myBytes =
   MkBytesWidget
-    { inMetrics = MkBytesMetrics {totalB = 1, meanB = 1.0},
-      outMetrics = MkBytesMetrics {totalB = 1, meanB = 1.0}
+    { inMetrics = MkBytesMetrics {totalB = 0, meanB = 0.0},
+      outMetrics = MkBytesMetrics {totalB = 0, meanB = 0.0}
     }
 
 myErrors :: Errors
-myErrors = MkErrors {errors = fromList ["."]}
+myErrors = MkErrors {errors = fromList []}
 
 myStatusCodes :: StatusCodes
-myStatusCodes = MkStatusCodes {statusCodes = M.fromList [("200", 0)]}
+myStatusCodes = MkStatusCodes {statusCodes = M.fromList []}
 
 myOtherStats :: OtherStats
 myOtherStats =
@@ -49,6 +49,7 @@ myOtherStats =
       requests = 10,
       throughput = 2.0,
       success = 0.5,
+      -- TODO: Update the dummy times to real times
       earliest = dummyUTCTime,
       latest = dummyUTCTime,
       end = dummyUTCTime
