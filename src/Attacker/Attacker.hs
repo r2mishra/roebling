@@ -24,7 +24,7 @@ attacker requestObj manager hitCount = do
       errorMessage = if status /= 200 then Just (getErrorMsg response) else Nothing
       bytesOut = length response
       bytesIn = length (show requestObj)
-   in return (AttackResult hitCount status (end `diffUTCTime` begin) errorMessage (toInteger bytesIn) (toInteger bytesOut))
+   in return (AttackResult hitCount status (end `diffUTCTime` begin) errorMessage (toInteger bytesIn) (toInteger bytesOut) begin end)
 
 getErrorMsg :: Response body -> String
 getErrorMsg response = show (statusMessage (responseStatus response))

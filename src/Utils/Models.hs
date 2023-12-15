@@ -8,7 +8,7 @@ import Data.Time
 import Network.HTTP.Simple (RequestHeaders)
 import Network.URI (URI)
 
-data AttackResult = AttackResult {seq :: Int, code :: Int, latency :: NominalDiffTime, error :: Maybe String, bytesIn :: Integer, bytesOut :: Integer} deriving (Show)
+data AttackResult = AttackResult {seq :: Int, code :: Int, latency :: NominalDiffTime, error :: Maybe String, bytesIn :: Integer, bytesOut :: Integer, requestTimestamp :: UTCTime, responseTimestamp :: UTCTime} deriving (Show)
 
 data AttackResultMessage = ResultMessage AttackResult deriving (Show)
 
