@@ -29,7 +29,7 @@ import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.Core
 import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent.STM (stateTVar)
-import Control.Monad (forM_)
+import Control.Monad (forM_, when)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST.Safe (STArray, getElems, newArray, writeArray)
@@ -171,7 +171,8 @@ data AppState = AppState
     _statusCodes :: W.StatusCodes,
     _reqErrors :: W.Errors,
     _otherstats :: W.OtherStats,
-    _pbState :: Float
+    _pbState :: Float,
+    _numSuccess :: Int -- num of successful requests (200)
     -- Include other fields as necessary
   }
 
@@ -336,6 +337,10 @@ handleEvent e = case e of
     numDone += 1
     numDone' <- use numDone
 
+    Control.Monad.when (code newAttackResult == 200) $ numSuccess += 1
+
+    numSuccess' <- use numSuccess
+
     let newBytesIn = bytesIn newAttackResult
         newBytesOut = bytesOut newAttackResult
      in bytesMetrics %= updatedByteMetrics newBytesIn newBytesOut numDone'
@@ -343,7 +348,8 @@ handleEvent e = case e of
     let newCode = show (code newAttackResult)
      in statusCodes %= \x -> updateStatusCode x newCode
 
-    otherstats %= updateOtherStats (fromIntegral numDone')
+
+    otherstats %= updateOtherStats numDone' numSuccess'
 
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
@@ -366,8 +372,8 @@ updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
           }
     }
 
-updateOtherStats :: Integer -> W.OtherStats -> W.OtherStats
-updateOtherStats numHits oldStats = oldStats {requests = fromIntegral numHits} 
+updateOtherStats :: Int -> Int -> W.OtherStats -> W.OtherStats
+updateOtherStats numHits numSuccess oldStats = oldStats {requests = fromIntegral numHits, success =  fromIntegral numSuccess / fromIntegral numHits }
 
 updateStatusCode :: W.StatusCodes -> String -> W.StatusCodes
 updateStatusCode (W.MkStatusCodes codes) key = W.MkStatusCodes updatedCodes

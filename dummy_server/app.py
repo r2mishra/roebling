@@ -1,6 +1,7 @@
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 import json
+import random
 import time
 
 app = FastAPI()
@@ -15,9 +16,12 @@ async def ping():
     print(f"Latency for /ping: {latency}")
     return result
 
+
 @app.get("/slow")
 async def slow():
     start_time = time.time()
+    if random.randint(0, 1):  # Randomly generate 0 or 1
+        raise HTTPException(status_code=500, detail="Random error")
     time.sleep(0.2)
     result = {"result": "pong"}
     end_time = time.time()

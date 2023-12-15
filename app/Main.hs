@@ -97,7 +97,8 @@ initializeAndRunPlot cmdFlags chan = do
             _numDone = 0,
             _hitCount = (duration cmdFlags) * (rate cmdFlags),
             _termwidth = termwidth,
-            _pbState = 0.0
+            _pbState = 0.0,
+            _numSuccess = 0
           }
   bchan <- newBChan 100
   -- updates latencies in a new thread
