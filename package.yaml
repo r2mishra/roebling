@@ -47,7 +47,6 @@ dependencies:
 - tasty-hunit
 - network-uri
 - directory
-- ghc-datasize
 ghc-options:
 - -Wall
 - -Wcompat
@@ -74,6 +73,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N2
+    - -w
     dependencies:
     - roebling
 

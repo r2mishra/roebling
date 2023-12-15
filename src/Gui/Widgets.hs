@@ -3,6 +3,7 @@
 
 module GUI.Widgets where
 
+import Attacker.Attacker
 import Brick
 import qualified Brick.AttrMap as A
 import Brick.Widgets.Border
@@ -107,7 +108,7 @@ drawParams p =
       Brick.str (show p)
 
 data BytesMetrics = MkBytesMetrics
-  { totalB :: Int,
+  { totalB :: Integer,
     meanB :: Double
   }
 
@@ -207,7 +208,7 @@ drawErrors e =
       Brick.str (show e)
 
 drawProgressBar :: Float -> Widget ()
-drawProgressBar p = ui
+drawProgressBar p = hLimitPercent 65 ui
   where
     -- use mapAttrNames
     xBar =
@@ -258,3 +259,10 @@ theMap =
 --               loop msg
 --             else do
 --               return ()
+
+drawLegend :: Widget ()
+drawLegend =
+  hLimit 30 $
+    withBorderStyle unicode $
+      borderWithLabel (str "Legend") $
+        Brick.str "q: Quit"

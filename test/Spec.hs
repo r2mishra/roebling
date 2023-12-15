@@ -1,6 +1,7 @@
 module Main where
 
 import qualified Attacker.PacerTest as PacerTest
+import qualified Attacker.TargeterTest as TargeterTest
 import qualified DurationTest as D
 import qualified ProgressBarTest as P
 import qualified ResultLoggerTest as R
@@ -18,7 +19,8 @@ tests =
           D.durationTests,
           W.tests
         ],
-      testGroup "Tests" [PacerTest.tests]
+      testGroup "Pacer Tests" [PacerTest.tests],
+      testGroup "Targeter Tests" [TargeterTest.tests]
     ]
 
 main :: IO ()
