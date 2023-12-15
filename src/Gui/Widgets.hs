@@ -28,6 +28,8 @@ import Lens.Micro ((^.))
 import qualified Graphics.Vty as V
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
+import qualified Graphics.Vty as V
+import Attacker.Attacker
 import Network.URI (URI)
 import Utils.Models (AttackResult (..), AttackResultMessage (..))
 import Text.Printf (printf)
@@ -117,7 +119,7 @@ drawParams p =
       Brick.str (show p)
 
 data BytesMetrics = MkBytesMetrics
-  { totalB :: Int,
+  { totalB :: Integer,
     meanB :: Double
   }
 

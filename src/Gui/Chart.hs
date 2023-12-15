@@ -29,6 +29,7 @@ import Brick.Widgets.Core
 import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent.STM (stateTVar)
 import Control.Monad (forM_)
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST.Safe (STArray, getElems, newArray, writeArray)
 import Data.Bool (bool)
@@ -177,7 +178,7 @@ data AppState = AppState
 makeLenses ''AppState -- provides a convenient way to access state vars while handling events
 
 -- | The main Brick application
-plotApp :: M.App AppState AttackResultMessage Name
+plotApp :: M.App AppState (Either AttackResultMessage Float) Name
 plotApp =
   M.App
     { M.appDraw = drawUI,
@@ -321,24 +322,39 @@ ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstat
           W.drawLegend
         ]
     ]
+    
 
 -- TODO: Currently, an event is either a keyboard entry or a list of latencies. This should include other data like OtherStats, etc.
-handleEvent :: T.BrickEvent Name Utils.Models.AttackResultMessage -> T.EventM Name AppState ()
+handleEvent :: T.BrickEvent Name (Either Utils.Models.AttackResultMessage Float) -> T.EventM Name AppState ()
 handleEvent e = case e of
-  (T.AppEvent (ResultMessage newAttackResult)) -> do
-    latencies %= (++ [latency newAttackResult])
+  (T.AppEvent (Right f)) -> do
+    pbState %= (\_ -> min f 1.0)
 
+  (T.AppEvent (Left (ResultMessage newAttackResult))) -> do
+  
+    latencies %= (++ [latency newAttackResult])
+    
     numDone += 1
     numDone' <- use numDone
-
-    hitCount' <- use hitCount
-
-    -- pbState %= (\_ -> (fromIntegral numDone') / (fromIntegral hitCount'))
-    -- TODO: Change to actual done percent
-    pbState += 0.02
+    
+    let newBytesIn = bytesIn newAttackResult in
+      let newBytesOut = bytesOut newAttackResult in
+        bytesMetrics %= (\(W.MkBytesWidget i o) -> W.MkBytesWidget
+            {
+              W.inMetrics = W.MkBytesMetrics{
+                W.totalB = (W.totalB i) + newBytesIn,
+                W.meanB = fromIntegral (W.totalB i + newBytesIn) / fromIntegral numDone'
+              },
+              W.outMetrics = W.MkBytesMetrics{
+                W.totalB = W.totalB o + newBytesOut,
+                W.meanB = fromIntegral (W.totalB o + newBytesOut) / fromIntegral numDone'
+            }
+          }
+        ) 
 
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ insert err e)
       Nothing -> return ()
+
   (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> M.halt
   _ -> return ()
