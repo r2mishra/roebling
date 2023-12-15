@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 -- needed for makelenses
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 
 module GUI.Chart
   ( -- * Plot
@@ -36,11 +37,11 @@ import Data.Bool (bool)
 import Data.Char (isSpace)
 import Data.Foldable (toList)
 import Data.List (dropWhileEnd, foldl', unfoldr)
+import Data.Map (alter, findWithDefault, insert)
 import qualified Data.Sequence as Seq
+import qualified Data.Set as Set
 import qualified Data.Text.Lazy as TL
-import Data.List (dropWhileEnd, unfoldr)
-import Data.Set (insert)
-import Data.Time (NominalDiffTime)
+import Data.Time (NominalDiffTime, TimeLocale (wDays))
 import Debug.Trace
 import GUI.Widgets (BytesWidget)
 import qualified GUI.Widgets as W
@@ -56,7 +57,6 @@ import Utils.Models
 
 appendDebugLog :: String -> IO ()
 appendDebugLog msg = appendFile "debug.log" (msg ++ "\n")
-
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.
@@ -234,9 +234,10 @@ myFillPlotWidget term_width myoptions mylatencies =
       let curWidth = round (0.1 * fromIntegral term_width)
       let cur_strings = getPlotLines myoptions mylatencies
       let cur_string_width = textWidth (head cur_strings)
-      let newLatencies = if cur_string_width > curWidth
-            then resizeStringList mylatencies cur_string_width curWidth
-            else mylatencies
+      let newLatencies =
+            if cur_string_width > curWidth
+              then resizeStringList mylatencies cur_string_width curWidth
+              else mylatencies
       let max_num_width = length (printf "%0.2f" (realToFrac $ maximum mylatencies :: Float) :: String)
       -- let newStrings = [keepLabelAndLastN' max_num_width curWidth x | x <- cur_strings] -- this is working. updating latencies isn't (??)
       let newStrings = getPlotLines myoptions newLatencies
@@ -250,7 +251,6 @@ myFillPlotWidget term_width myoptions mylatencies =
           []
           Brick.BorderMap.empty
 
-
 keepLabelAndLastN' :: Int -> Int -> [a] -> [a]
 keepLabelAndLastN' skipNum n xs = (take skipNum xs) ++ (lastN' n (lastN' (length xs - skipNum) xs))
 
@@ -263,8 +263,8 @@ resizeStringList :: [Double] -> Int -> Int -> [Double]
 resizeStringList mylatencies cur_string_width curWidth = lastN' subN mylatencies
   where
     subN = round (fromIntegral (length mylatencies) * 0.9)
-    -- subN = round (fromIntegral (length mylatencies) * (fromIntegral curWidth / fromIntegral cur_string_width))
 
+-- subN = round (fromIntegral (length mylatencies) * (fromIntegral curWidth / fromIntegral cur_string_width))
 
 lastN' :: Int -> [a] -> [a]
 lastN' n xs = foldl' (const . drop 1) xs (drop n xs)
@@ -303,7 +303,7 @@ drawUI state = [go]
     myprogressbar = _pbState state
 
 -- The UI widget that includes the ASCII chart
-ui ::Int -> W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
+ui :: Int -> W.Params -> Options -> [NominalDiffTime] -> W.BytesWidget -> W.StatusCodes -> W.Errors -> W.OtherStats -> Float -> T.Widget ()
 ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstats myprogressbarstate =
   vBox
     [ myFillPlotWidget termwidth myoptions (map realToFrac mylatencies :: [Double]),
@@ -322,40 +322,52 @@ ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstat
           W.drawLegend
         ]
     ]
-    
 
 -- TODO: Currently, an event is either a keyboard entry or a list of latencies. This should include other data like OtherStats, etc.
 handleEvent :: T.BrickEvent Name (Either Utils.Models.AttackResultMessage Float) -> T.EventM Name AppState ()
 handleEvent e = case e of
   (T.AppEvent (Right f)) -> do
+
     numDone' <- use numDone
     pbState %= (\_ -> if numDone' == 0 then 0 else min f 1.0)
-
   (T.AppEvent (Left (ResultMessage newAttackResult))) -> do
-  
     latencies %= (++ [latency newAttackResult])
-    
+
     numDone += 1
     numDone' <- use numDone
-    
-    let newBytesIn = bytesIn newAttackResult in
-      let newBytesOut = bytesOut newAttackResult in
-        bytesMetrics %= (\(W.MkBytesWidget i o) -> W.MkBytesWidget
-            {
-              W.inMetrics = W.MkBytesMetrics{
-                W.totalB = (W.totalB i) + newBytesIn,
-                W.meanB = fromIntegral (W.totalB i + newBytesIn) / fromIntegral numDone'
-              },
-              W.outMetrics = W.MkBytesMetrics{
-                W.totalB = W.totalB o + newBytesOut,
-                W.meanB = fromIntegral (W.totalB o + newBytesOut) / fromIntegral numDone'
-            }
-          }
-        ) 
+
+    let newBytesIn = bytesIn newAttackResult
+        newBytesOut = bytesOut newAttackResult
+     in bytesMetrics %= updatedByteMetrics newBytesIn newBytesOut numDone'
+
+    let newCode = show (code newAttackResult)
+     in statusCodes %= \x -> updateStatusCode x newCode
 
     case Utils.Models.error newAttackResult of
-      Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ insert err e)
+      Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
       Nothing -> return ()
-
   (T.VtyEvent (V.EvKey (V.KChar 'q') [])) -> M.halt
   _ -> return ()
+
+updatedByteMetrics :: Integer -> Integer -> Int -> BytesWidget -> BytesWidget
+updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
+  W.MkBytesWidget
+    { W.inMetrics =
+        W.MkBytesMetrics
+          { W.totalB = W.totalB i + newBytesIn,
+            W.meanB = fromIntegral (W.totalB i + newBytesIn) / fromIntegral numDone'
+          },
+      W.outMetrics =
+        W.MkBytesMetrics
+          { W.totalB = W.totalB o + newBytesOut,
+            W.meanB = fromIntegral (W.totalB o + newBytesOut) / fromIntegral numDone'
+          }
+    }
+
+updateStatusCode :: W.StatusCodes -> String -> W.StatusCodes
+updateStatusCode (W.MkStatusCodes codes) key = W.MkStatusCodes updatedCodes
+  where
+    updatedCodes = alter updateValue key codes
+    updateValue :: Maybe Int -> Maybe Int
+    updateValue (Just x) = Just (x + 1)
+    updateValue Nothing = Just 0

@@ -37,10 +37,10 @@ myBytes =
     }
 
 myErrors :: Errors
-myErrors = MkErrors {errors = fromList ["None"]}
+myErrors = MkErrors {errors = fromList ["."]}
 
 myStatusCodes :: StatusCodes
-myStatusCodes = MkStatusCodes {statusCodes = M.fromList [("200", 1)]}
+myStatusCodes = MkStatusCodes {statusCodes = M.fromList [("200", 0)]}
 
 myOtherStats :: OtherStats
 myOtherStats =

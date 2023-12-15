@@ -5,15 +5,12 @@ module GUI.Widgets where
 
 import Attacker.Attacker
 import Brick
+import qualified Brick.AttrMap as A
 import qualified Brick.BorderMap
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)
 import qualified Brick.Widgets.Border.Style as BS
 import Brick.Widgets.Core (textWidth)
-import qualified Brick.AttrMap as A
-import Brick.Widgets.Border
-import Brick.Widgets.Border.Style (unicode)
-import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent (Chan, readChan)
 import Data.List (sort)
@@ -24,15 +21,13 @@ import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
 import qualified Graphics.Vty
-import Lens.Micro ((^.))
 import qualified Graphics.Vty as V
+import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
-import qualified Graphics.Vty as V
-import Attacker.Attacker
 import Network.URI (URI)
-import Utils.Models (AttackResult (..), AttackResultMessage (..))
 import Text.Printf (printf)
+import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- | Params is the set of attack parameters
 data Params = MkParams
@@ -134,10 +129,10 @@ instance Show BytesWidget where
     unlines
       [ "In:",
         "  Total: " ++ show (totalB $ inMetrics b),
-        "  Mean: " ++ show (meanB $ inMetrics b),
+        "  Mean: " ++ printf "%0.4f" (meanB $ inMetrics b),
         "Out:",
         "  Total: " ++ show (totalB $ outMetrics b),
-        "  Mean: " ++ show (meanB $ outMetrics b)
+        "  Mean: " ++ printf "%0.4f" (meanB $ outMetrics b)
       ]
 
 drawBytes :: BytesWidget -> Widget ()
@@ -251,25 +246,6 @@ theMap =
       (xToDoAttr, V.white `on` V.white),
       (P.progressIncompleteAttr, fg V.white)
     ]
-
--- updatePlot :: Chan AttackResultMessage -> IO ()
--- updatePlot channel = do
---   loop Nothing
---   where
---     loop msg = do
---       res <- readChan channel
---       case res of
---         StopMessage hitCount -> do
---           -- print $ "Logger ==> Will stop at Hit: " ++ show hitCount
---           loop $ Just (hitCount - 1)
---         ResultMessage (AttackResult hitCount code latency) -> do
---           if msg /= Just (hitCount + 1)
---             then do
---               -- print $ "Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency
-
---               loop msg
---             else do
---               return ()
 
 drawLegend :: Widget ()
 drawLegend =
