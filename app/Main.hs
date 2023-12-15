@@ -13,7 +13,6 @@ import Control.Concurrent.Async
 import Control.Concurrent.Chan (Chan, newChan, readChan)
 import Control.Monad
 import Data.Time (NominalDiffTime)
-import Data.Time.Clock.System (getSystemTime, systemSeconds)
 import GHC.Conc.IO (threadDelay)
 import qualified GHC.Conc.Sync
 import GUI.Chart
@@ -63,7 +62,6 @@ buildPacer cmdFlags =
 -- Currently, this uses dummy data, can be extended to use data from the attacker
 initializeAndRunPlot :: Flags -> Chan Models.AttackResultMessage -> IO ()
 initializeAndRunPlot cmdFlags chan = do
-  currTime <- getSystemTime
   let params =
         W.MkParams
           { W.target = target cmdFlags,
@@ -85,8 +83,7 @@ initializeAndRunPlot cmdFlags chan = do
             _otherstats = myOtherStats,
             _numDone = 0,
             _hitCount = (duration cmdFlags) * (rate cmdFlags),
-            _pbState = 0.0,
-            _startTime = fromIntegral (systemSeconds currTime)
+            _pbState = 0.0
           }
   bchan <- newBChan 100
   -- updates latencies in a new thread

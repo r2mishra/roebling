@@ -36,7 +36,6 @@ import Data.Char (isSpace)
 import Data.List (dropWhileEnd, unfoldr)
 import Data.Set (insert)
 import Data.Time (NominalDiffTime)
-import Data.Time.Clock.System (getSystemTime, systemSeconds)
 import GUI.Widgets (BytesWidget)
 import qualified GUI.Widgets as W
 import qualified Graphics.Vty as V
@@ -157,8 +156,7 @@ data AppState = AppState
     _statusCodes :: W.StatusCodes,
     _reqErrors :: W.Errors,
     _otherstats :: W.OtherStats,
-    _pbState :: Float,
-    _startTime :: Integer
+    _pbState :: Float
     -- Include other fields as necessary
   }
 
