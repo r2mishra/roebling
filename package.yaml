@@ -49,7 +49,6 @@ dependencies:
 - directory
 - microlens
 - terminal-size
-
 ghc-options:
 - -Wall
 - -Wcompat

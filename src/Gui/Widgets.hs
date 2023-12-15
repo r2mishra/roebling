@@ -5,15 +5,12 @@ module GUI.Widgets where
 
 import Attacker.Attacker
 import Brick
+import qualified Brick.AttrMap as A
 import qualified Brick.BorderMap
 import Brick.Widgets.Border
 import Brick.Widgets.Border.Style (unicode)
 import qualified Brick.Widgets.Border.Style as BS
 import Brick.Widgets.Core (textWidth)
-import qualified Brick.AttrMap as A
-import Brick.Widgets.Border
-import Brick.Widgets.Border.Style (unicode)
-import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent (Chan, readChan)
 import Data.List (sort)
@@ -24,13 +21,13 @@ import Data.Time (NominalDiffTime, TimeLocale, UTCTime)
 import Data.Tree (drawTree)
 import GHC.Base (VecElem (DoubleElemRep))
 import qualified Graphics.Vty
-import Lens.Micro ((^.))
 import qualified Graphics.Vty as V
+import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
 import Network.URI (URI)
-import Utils.Models (AttackResult (..), AttackResultMessage (..))
 import Text.Printf (printf)
+import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- | Params is the set of attack parameters
 data Params = MkParams
@@ -117,7 +114,7 @@ drawParams p =
       Brick.str (show p)
 
 data BytesMetrics = MkBytesMetrics
-  { totalB :: Int,
+  { totalB :: Integer,
     meanB :: Double
   }
 
@@ -132,10 +129,10 @@ instance Show BytesWidget where
     unlines
       [ "In:",
         "  Total: " ++ show (totalB $ inMetrics b),
-        "  Mean: " ++ show (meanB $ inMetrics b),
+        "  Mean: " ++ printf "%0.4f" (meanB $ inMetrics b),
         "Out:",
         "  Total: " ++ show (totalB $ outMetrics b),
-        "  Mean: " ++ show (meanB $ outMetrics b)
+        "  Mean: " ++ printf "%0.4f" (meanB $ outMetrics b)
       ]
 --   withBorderStyle unicode $ borderWithLabel (str "Bytes") $
 drawBytes :: BytesWidget -> Widget ()
@@ -234,7 +231,7 @@ drawProgressBar p = hLimitPercent 65 ui
         $ p
     lbl c = Just $ show $ fromEnum $ c * 100
     bar v = P.progressBar (lbl v) v
-    ui = xBar
+    ui = withBorderStyle unicode $ borderWithLabel (str "Progress Bar") $ xBar
 
 theBaseAttr :: A.AttrName
 theBaseAttr = A.attrName "theBase"
