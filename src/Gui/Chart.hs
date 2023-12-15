@@ -43,7 +43,7 @@ import qualified Data.Set as Set
 import qualified Data.Text.Lazy as TL
 import Data.Time (NominalDiffTime, TimeLocale (wDays))
 import Debug.Trace
-import GUI.Widgets (BytesWidget)
+import GUI.Widgets (BytesWidget, OtherStats (..))
 import qualified GUI.Widgets as W
 import qualified Graphics.Vty
 import qualified Graphics.Vty as V
@@ -327,6 +327,7 @@ ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstat
 handleEvent :: T.BrickEvent Name (Either Utils.Models.AttackResultMessage Float) -> T.EventM Name AppState ()
 handleEvent e = case e of
   (T.AppEvent (Right f)) -> do
+
     numDone' <- use numDone
     pbState %= (\_ -> if numDone' == 0 then 0 else min f 1.0)
   (T.AppEvent (Left (ResultMessage newAttackResult))) -> do
@@ -341,6 +342,8 @@ handleEvent e = case e of
 
     let newCode = show (code newAttackResult)
      in statusCodes %= \x -> updateStatusCode x newCode
+
+    otherstats %= updateOtherStats (fromIntegral numDone')
 
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
@@ -362,6 +365,9 @@ updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
             W.meanB = fromIntegral (W.totalB o + newBytesOut) / fromIntegral numDone'
           }
     }
+
+updateOtherStats :: Integer -> W.OtherStats -> W.OtherStats
+updateOtherStats numHits oldStats = oldStats {requests = fromIntegral numHits} 
 
 updateStatusCode :: W.StatusCodes -> String -> W.StatusCodes
 updateStatusCode (W.MkStatusCodes codes) key = W.MkStatusCodes updatedCodes
