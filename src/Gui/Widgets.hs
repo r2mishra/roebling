@@ -167,8 +167,7 @@ drawStatusCodes s =
 
 -- | Other important statistics for the attack such as throughput, success rate, etc
 data OtherStats = MkOtherStats
-  { -- | Wait is the extra time spent waiting for requests from target
-    wait :: NominalDiffTime,
+  { 
     -- | Requests is the number of requests executed
     requests :: Int,
     -- | Throughput is the rate of successful requests per second
@@ -187,7 +186,7 @@ instance Show OtherStats where
   show :: OtherStats -> String
   show os =
     unlines
-      [ "Wait: " ++ show (wait os),
+      [ 
         "Requests: " ++ show (requests os),
         "Throughput: " ++ show (throughput os),
         "Success: " ++ show (success os),

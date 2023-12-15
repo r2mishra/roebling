@@ -29,7 +29,7 @@ import Brick.Widgets.Center (hCenter)
 import Brick.Widgets.Core
 import qualified Brick.Widgets.ProgressBar as P
 import Control.Concurrent.STM (stateTVar)
-import Control.Monad (forM_)
+import Control.Monad (forM_, when)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.ST (ST, runST)
 import Data.Array.ST.Safe (STArray, getElems, newArray, writeArray)
@@ -43,19 +43,21 @@ import qualified Data.Set as Set
 import qualified Data.Text.Lazy as TL
 import Data.Time (NominalDiffTime, TimeLocale (wDays))
 import Debug.Trace
-import GUI.Widgets (BytesWidget)
+import GUI.Widgets (BytesWidget, OtherStats (..))
 import qualified GUI.Widgets as W
 import qualified Graphics.Vty
 import qualified Graphics.Vty as V
 import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
-import System.Exit (exitSuccess)
-import System.IO.Unsafe (unsafePerformIO)
-import Lens.Micro ((^.), (&), (.~), to)
+import System.Console.Terminal.Size (size, width)
 import Text.Printf (printf)
 import Utils.Models
+import Data.Time.Clock (diffUTCTime)
+import System.Exit (exitSuccess)
+import Lens.Micro ((^.), (&), (.~), to)
 import Graphics.Vty (horizCat)
+
 
 appendDebugLog :: String -> IO ()
 appendDebugLog msg = appendFile "debug.log" (msg ++ "\n")
@@ -167,7 +169,8 @@ data AppState = AppState
     _statusCodes :: W.StatusCodes,
     _reqErrors :: W.Errors,
     _otherstats :: W.OtherStats,
-    _pbState :: Float
+    _pbState :: Float,
+    _numSuccess :: Int -- num of successful requests (200)
     -- Include other fields as necessary
   }
 
@@ -347,6 +350,7 @@ fillWidgetsEvenly myparams mylatencies bytes statuscodes errors myotherstats =
 handleEvent :: T.BrickEvent Name (Either Utils.Models.AttackResultMessage Float) -> T.EventM Name AppState ()
 handleEvent e = case e of
   (T.AppEvent (Right f)) -> do
+
     numDone' <- use numDone
     pbState %= (\_ -> if numDone' == 0 then 0 else min f 1.0)
   (T.AppEvent (Left (ResultMessage newAttackResult))) -> do
@@ -355,12 +359,18 @@ handleEvent e = case e of
     numDone += 1
     numDone' <- use numDone
 
+    Control.Monad.when (code newAttackResult == 200) $ numSuccess += 1
+
+    numSuccess' <- use numSuccess
+
     let newBytesIn = bytesIn newAttackResult
         newBytesOut = bytesOut newAttackResult
      in bytesMetrics %= updatedByteMetrics newBytesIn newBytesOut numDone'
 
     let newCode = show (code newAttackResult)
      in statusCodes %= \x -> updateStatusCode x newCode
+
+    otherstats %= updateOtherStats numDone' numSuccess' newAttackResult
 
     case Utils.Models.error newAttackResult of
       Just err -> reqErrors %= (\(W.MkErrors e) -> W.MkErrors $ Set.insert err e)
@@ -384,6 +394,24 @@ updatedByteMetrics newBytesIn newBytesOut numDone' (W.MkBytesWidget i o) =
             W.meanB = fromIntegral (W.totalB o + newBytesOut) / fromIntegral numDone'
           }
     }
+
+
+updateOtherStats :: Int -> Int -> AttackResult -> OtherStats -> OtherStats
+updateOtherStats numHits numSuccess result oldStats =
+  oldStats
+    { requests = numHits
+    , success = fromIntegral numSuccess / fromIntegral numHits
+    , earliest = earliest
+    , latest = Utils.Models.requestTimestamp result
+    , end = Utils.Models.responseTimestamp result
+    , throughput = fromIntegral numSuccess / realToFrac (diffUTCTime latest earliest)
+    }
+  where
+    earliest = if numHits == 1
+               then Utils.Models.requestTimestamp result
+               else W.earliest oldStats
+    latest  = Utils.Models.responseTimestamp result
+
 
 updateStatusCode :: W.StatusCodes -> String -> W.StatusCodes
 updateStatusCode (W.MkStatusCodes codes) key = W.MkStatusCodes updatedCodes
