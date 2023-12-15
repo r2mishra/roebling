@@ -22,7 +22,7 @@ attacker requestObj manager hitCount = do
   end <- getCurrentTime
   let status = statusCode $ responseStatus response
       errorMessage = if status /= 200 then Just (getErrorMsg response) else Nothing
-      bytesOut = length response
+      bytesOut = length (show response)
       bytesIn = length (show requestObj)
    in return (AttackResult hitCount status (end `diffUTCTime` begin) errorMessage (toInteger bytesIn) (toInteger bytesOut) begin end)
 
