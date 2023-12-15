@@ -89,7 +89,7 @@ initializeAndRunPlot cmdFlags chan = do
   bchan <- newBChan 10000
   -- updates latencies in a new thread
   _ <- forkIO $ chanToBChanAdapter chan bchan
-  -- _ <- tick (fromIntegral (duration cmdFlags)) bchan
+  _ <- tick (fromIntegral (duration cmdFlags)) bchan
   -- TODO: this can be run in it's own thread as well.
   void $ M.customMainWithDefaultVty (Just bchan) plotApp initialState
 
