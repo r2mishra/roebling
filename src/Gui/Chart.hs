@@ -328,7 +328,8 @@ ui termwidth myparams myoptions mylatencies bytes statuscodes errors myotherstat
 handleEvent :: T.BrickEvent Name (Either Utils.Models.AttackResultMessage Float) -> T.EventM Name AppState ()
 handleEvent e = case e of
   (T.AppEvent (Right f)) -> do
-    pbState %= (\_ -> min f 1.0)
+    numDone' <- use numDone
+    pbState %= (\_ -> if numDone' == 0 then 0 else min f 1.0)
 
   (T.AppEvent (Left (ResultMessage newAttackResult))) -> do
   
