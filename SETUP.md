@@ -29,13 +29,6 @@ To execute the `Main.hs` script, run:
 cabal run roebling-exe  -- --method GET http://localhost:8000/slow
 ```
 
-# Run plotting demo
-
-To see the current plotting demo, run:
-```
-cabal run roebling-exe  -- --method GET http://localhost:8000/slow --plotDemo
-```
-
 
 # Makefile shorthand
 

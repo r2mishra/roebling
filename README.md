@@ -17,8 +17,8 @@ A command-line based load testing tool in Haskell that can plot metrics related 
 # Design
 - Parse command-line options
 - Generate concurrent requests at given pace with a Pacer
-- Plot latencies in real-time with a ASCII line chart using `brick`.
-- Calculate aggregate metrics for bytes sent and received, percentiles for latency distribution, statistics for request success, etc
+- Plot latencies in real-time with a ASCII line chart using `brick`. (Credits: [asciichart](https://github.com/madnight/asciichart)). Resize if needed to fit terminal width.
+- Calculate metrics for bytes sent and received, percentiles for latency distribution, statistics for request successes, etc
 
 # Architecture
 We have a basic setup to attack a given target endpoint at a given rate for a set number of times with the help of a pacer. We've replicated command-line arguments for [ali](https://github.com/nakabonne/ali), but haven't implemented all the features yet. There are two key components, each to be run in it's own thread: 
@@ -27,17 +27,32 @@ We have a basic setup to attack a given target endpoint at a given rate for a se
 
 The final UI looks as follows:
 
+![UI](images/brick_ui.png)
 
 
 ## Challenges
-One of the challenges we faced were to setup the the async logic for pacing requests and communicating between the attacker and the GUI components. Working with an ASCII line chart is also a bit messy. We've had to make a hacky custom widget which monitors the current width of the plot and drops some of the earlier entries from the latency list in order to fit the plot in the terminal width.
-
-# References
-[Ali](https://github.com/nakabonne/ali) - Reference load testing library implemented in Go
-[Vegeta](https://github.com/tsenart/vegeta) - Go library implementing Pacer and Attacker modules used in Ali 
-[Asciichart](https://github.com/madnight/asciichart) - Reference for the core plotting logic.
-
+One of the challenges we faced were to setup the the async logic for pacing requests and communicating between the attacker and the GUI components. Working with an ASCII line chart is also a bit messy. We've had to make a hacky custom widget which monitors the current width of the plot and drops some of the earlier entries from the latency list in order to fit the plot in the terminal's width.
 
 # Setup instructions
 
-Head over to [SETUP.md](/SETUP.md) for instructions on build management and running the server.
+## The short version
+
+You'll need to install cabal. Here are the set of commands to run if you want to load test github.com:
+
+```
+gh repo clone r2mishra/roebling
+cabal install hpack 
+hpack
+cabal build
+cabal run roebling-exe  -- --method GET http://www.github.com/ --rate 20 --duration 30
+```
+
+## The long version
+
+Head over to [SETUP.md](/SETUP.md) for instructions on build management and running the server with Makefile shorthands. 
+
+
+# References
+- [Ali](https://github.com/nakabonne/ali) - Reference load testing library implemented in Go
+- [Vegeta](https://github.com/tsenart/vegeta) - Go library implementing Pacer and Attacker modules used in Ali 
+- [Asciichart](https://github.com/madnight/asciichart) - Reference for the core plotting logic.
