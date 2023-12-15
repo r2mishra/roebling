@@ -24,10 +24,10 @@ repli :: [a] -> Int -> [a]
 repli xs n = xs >>= replicate n
 
 myLatencies :: [NominalDiffTime]
-myLatencies = map fromRational [0.1]
+myLatencies = map fromRational []
 
 myoptions :: Options
-myoptions = MkOptions {height = 14}
+myoptions = MkOptions {height = 20}
 
 myBytes :: BytesWidget
 myBytes =
@@ -46,9 +46,9 @@ myOtherStats :: OtherStats
 myOtherStats =
   MkOtherStats
     { 
-      requests = 10,
-      throughput = 2.0,
-      success = 0.5,
+      requests = 0,
+      throughput = 0.0,
+      success = 0.0,
       -- TODO: Update the dummy times to real times
       earliest = dummyUTCTime,
       latest = dummyUTCTime,
