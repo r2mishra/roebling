@@ -50,7 +50,6 @@ import qualified Graphics.Vty as V
 import Lens.Micro ((^.))
 import Lens.Micro.Mtl
 import Lens.Micro.TH (makeLenses)
-import System.Console.Terminal.Size (size, width)
 import Text.Printf (printf)
 import Utils.Models
 import Data.Time.Clock (diffUTCTime)
