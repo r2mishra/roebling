@@ -413,4 +413,4 @@ updateStatusCode (W.MkStatusCodes codes) key = W.MkStatusCodes updatedCodes
     updatedCodes = alter updateValue key codes
     updateValue :: Maybe Int -> Maybe Int
     updateValue (Just x) = Just (x + 1)
-    updateValue Nothing = Just 0
+    updateValue Nothing = Just 1
