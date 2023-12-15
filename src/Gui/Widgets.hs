@@ -228,7 +228,7 @@ drawProgressBar p = hLimitPercent 65 ui
         $ p
     lbl c = Just $ show $ fromEnum $ c * 100
     bar v = P.progressBar (lbl v) v
-    ui = xBar
+    ui = withBorderStyle unicode $ borderWithLabel (str "Progress Bar") $ xBar
 
 theBaseAttr :: A.AttrName
 theBaseAttr = A.attrName "theBase"
