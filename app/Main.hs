@@ -22,14 +22,10 @@ import Options.Applicative
 import System.Console.Terminal.Size (size, width)
 import System.IO
 import qualified Utils.Models as Models
-
--- Somewhere in your initialization code
-setupDebugLog :: IO ()
-setupDebugLog = writeFile "debug.log" "Starting Debug Log\n"
+import Control.Monad.IO.Class (liftIO)
 
 main :: IO ()
 main = do
-  setupDebugLog -- DEBUGGING
   cmdFlags <- execParser (info (helper <*> Args.flags) fullDesc)
 
   let targetter = buildTargetter cmdFlags
@@ -40,12 +36,12 @@ main = do
   _ <- getLine
 
   attackerThread <- async $ runAttacker attackChannel targetter pacer
-  -- fetcherThread <- async $ runLogger attackChannel
+  appendFile "results.log" ("Log for attacking url:" ++ (show (Args.target cmdFlags)) ++ "\n")
+  fetcherThread <- async $ runLogger "results.log" attackChannel
 
   initializeAndRunPlot cmdFlags attackChannel
   wait attackerThread
-
--- wait fetcherThread
+  wait fetcherThread
 
 buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =

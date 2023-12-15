@@ -12,12 +12,12 @@ import System.Timeout
 import Utils.Models (AttackResult (..), AttackResultMessage (..))
 
 -- Dummy file to experiment with channels
-runLogger :: Chan AttackResultMessage -> IO ()
-runLogger channel = loop
+runLogger :: String -> Chan AttackResultMessage -> IO ()
+runLogger fn channel = loop
   where
     loop = do
       maybeMsg <- timeout (5 * 1000000) (readChan channel) -- 5 seconds timeout (microseconds)
       Control.Monad.when (isJust maybeMsg) $ do
         let ResultMessage (AttackResult hitCount code latency error bytesIn bytesOut) = fromJust maybeMsg
-        print $ "Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency ++ ", Error: " ++ show error ++ ", Bytes In: " ++ show bytesIn ++ ", Bytes Out: " ++ show bytesOut
+        appendFile fn ("Logger ==> Hit: " ++ show hitCount ++ ", Code: " ++ show code ++ ", Latency: " ++ show latency ++ ", Error: " ++ show error ++ ", Bytes In: " ++ show bytesIn ++ ", Bytes Out: " ++ show bytesOut ++ "\n")
         loop
