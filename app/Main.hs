@@ -5,14 +5,12 @@ module Main (main) where
 import Args
 import Attacker.Attacker (runAttacker)
 import qualified Attacker.Pacer as Pacer
-import Attacker.ResultLogger (runLogger)
 import Brick.BChan (BChan, newBChan, writeBChan)
 import qualified Brick.Main as M
 import Control.Concurrent (forkIO)
 import Control.Concurrent.Async
 import Control.Concurrent.Chan (Chan, newChan, readChan)
 import Control.Monad
-import Data.Time (NominalDiffTime)
 import GHC.Conc.IO (threadDelay)
 import qualified GHC.Conc.Sync
 import GUI.Chart
@@ -20,16 +18,10 @@ import GUI.SampleData
 import qualified GUI.Widgets as W
 import Options.Applicative
 import System.Console.Terminal.Size (size, width)
-import System.IO
 import qualified Utils.Models as Models
-
--- Somewhere in your initialization code
-setupDebugLog :: IO ()
-setupDebugLog = writeFile "debug.log" "Starting Debug Log\n"
 
 main :: IO ()
 main = do
-  setupDebugLog -- DEBUGGING
   cmdFlags <- execParser (info (helper <*> Args.flags) fullDesc)
 
   let targetter = buildTargetter cmdFlags

@@ -4,7 +4,6 @@ import qualified Attacker.PacerTest as PacerTest
 import qualified Attacker.TargeterTest as TargeterTest
 import qualified DurationTest as D
 import qualified ProgressBarTest as P
-import qualified ResultLoggerTest as R
 import Test.Tasty
 import Test.Tasty.HUnit
 import qualified WidgetsTest as W

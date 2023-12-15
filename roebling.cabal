@@ -124,7 +124,6 @@ test-suite roebling-test
       Attacker.TargeterTest
       DurationTest
       ProgressBarTest
-      ResultLoggerTest
       WidgetsTest
       Paths_roebling
   autogen-modules:
