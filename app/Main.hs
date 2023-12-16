@@ -36,6 +36,7 @@ main = do
 
   attackerThread <- async $ runAttacker attackChannel targetter pacer
 
+  -- TODO: this should read AND write back entries into the channel
   -- appendFile "results.log" ("Log for attacking url:" ++ (show (Args.target cmdFlags)) ++ "\n")
   -- fetcherThread <- async $ runLogger "results.log" attackChannel
 
@@ -61,7 +62,7 @@ buildPacer cmdFlags =
       Pacer.duration = fromIntegral (Args.duration cmdFlags)
     }
 
--- Implement the logic to read from the channel and update the graph
+-- | Implement the logic to read from the channel and update the graph
 initializeAndRunPlot :: Flags -> Chan Models.AttackResultMessage -> IO ()
 initializeAndRunPlot cmdFlags chan = do
   let params =
@@ -90,7 +91,6 @@ initializeAndRunPlot cmdFlags chan = do
   -- updates latencies in a new thread
   _ <- forkIO $ chanToBChanAdapter chan bchan
   _ <- tick (fromIntegral (duration cmdFlags)) bchan
-  -- TODO: this can be run in it's own thread as well.
   void $ M.customMainWithDefaultVty (Just bchan) plotApp initialState
 
 chanToBChanAdapter :: Chan Models.AttackResultMessage -> BChan (Either Models.AttackResultMessage Float) -> IO ()
