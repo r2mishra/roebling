@@ -43,7 +43,6 @@ import qualified Data.Set as Set
 import qualified Data.Text.Lazy as TL
 import Data.Time (NominalDiffTime, TimeLocale (wDays))
 import Data.Time.Clock (diffUTCTime)
-import Debug.Trace
 import GUI.Widgets (BytesWidget, OtherStats (..))
 import qualified GUI.Widgets as W
 import Graphics.Vty (horizCat)
@@ -55,9 +54,6 @@ import Lens.Micro.TH (makeLenses)
 import System.Exit (exitSuccess)
 import Text.Printf (printf)
 import Utils.Models
-
-appendDebugLog :: String -> IO ()
-appendDebugLog msg = appendFile "debug.log" (msg ++ "\n")
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.
@@ -219,10 +215,10 @@ myFillPlotWidget myoptions mylatencies =
       ctx <- T.getContext
       let a = ctx ^. T.attrL
       -- c <- T.getContext
-      let fullWidth = ctx ^. T.availWidthL
+      let fullWidth = (ctx ^. T.availWidthL)
       let curWidth = round (0.6 * fromIntegral fullWidth) -- more conservative to see updates quickly
       let cur_strings = getPlotLines myoptions mylatencies
-      let cur_string_width = if not (null cur_strings) then textWidth (head cur_strings) else 0
+      let cur_string_width = if length cur_strings > 0 then textWidth (head cur_strings) else 0
       let newLatencies =
             if cur_string_width > curWidth
               then resizeStringList mylatencies cur_string_width curWidth
