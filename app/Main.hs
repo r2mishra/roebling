@@ -12,7 +12,6 @@ import Control.Concurrent (forkIO)
 import Control.Concurrent.Async
 import Control.Concurrent.Chan (Chan, newChan, readChan)
 import Control.Monad
-import Control.Monad.IO.Class (liftIO)
 import Data.Time (NominalDiffTime)
 import GHC.Conc.IO (threadDelay)
 import qualified GHC.Conc.Sync
