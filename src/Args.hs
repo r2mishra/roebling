@@ -10,11 +10,11 @@ import Options.Applicative
 data Flags = Flags
   { rate :: Int,
     duration :: Int,
-    timeout :: Int,
     method :: Text,
-    headers :: Map String String,
     body :: Maybe Text,
     bodyFile :: Maybe FilePath,
+    --- Dummy Args simply borrowed from Ali. --- 
+    headers :: Map String String,
     maxBody :: Int,
     version :: Bool,
     debug :: Bool,
@@ -31,9 +31,9 @@ data Flags = Flags
     resolvers :: Text,
     queryRange :: Int,
     redrawInterval :: Int,
-    target :: URI,
-    plotDemo :: Bool,
-    progressBar :: Bool
+    timeout :: Int,
+    ---------------
+    target :: URI -- target url, required arg
   }
   deriving (Show)
 
@@ -56,27 +56,11 @@ flags =
           <> value 0
           <> showDefault
       )
-    <*> option
-      auto
-      ( long "timeout"
-          <> short 't'
-          <> help "The timeout for each request. 0s means to disable timeouts."
-          <> value 0
-          <> showDefault
-      )
     <*> strOption
       ( long "method"
           <> short 'm'
           <> help "An HTTP request method for each request."
           <> value "GET"
-          <> showDefault
-      )
-    <*> option
-      auto
-      ( long "header"
-          <> short 'H'
-          <> help "A request header to be sent. Can be used multiple times to send multiple headers."
-          <> value (Map.fromList [("User-Agent", "roebling")])
           <> showDefault
       )
     <*> optional
@@ -93,6 +77,14 @@ flags =
               <> short 'B'
               <> help "The path to file whose content will be set as the http request body."
           )
+      )
+    <*> option
+      auto
+      ( long "header"
+          <> short 'H'
+          <> help "A request header to be sent. Can be used multiple times to send multiple headers."
+          <> value (Map.fromList [("User-Agent", "roebling")])
+          <> showDefault
       )
     <*> option
       auto
@@ -192,17 +184,15 @@ flags =
           <> value 0
           <> showDefault
       )
+    <*> option
+      auto
+      ( long "timeout"
+          <> short 't'
+          <> help "The timeout for each request. 0s means to disable timeouts."
+          <> value 0
+          <> showDefault
+      )
     <*> uriParser
-    <*> switch
-      ( long "plotDemo"
-          -- <> short 'v' already being used by version
-          <> help "Plot a simple dummy chart for the GUI"
-      )
-    <*> switch
-      ( long "progressBar"
-          <> short 'p'
-          <> help "Show progress bar"
-      )
 
 uriParser :: Parser URI
 uriParser =

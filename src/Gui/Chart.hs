@@ -42,7 +42,6 @@ import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Text.Lazy as TL
 import Data.Time (NominalDiffTime, TimeLocale (wDays))
-import Debug.Trace
 import GUI.Widgets (BytesWidget, OtherStats (..))
 import qualified GUI.Widgets as W
 import qualified Graphics.Vty
@@ -56,10 +55,6 @@ import Data.Time.Clock (diffUTCTime)
 import System.Exit (exitSuccess)
 import Lens.Micro ((^.), (&), (.~), to)
 import Graphics.Vty (horizCat)
-
-
-appendDebugLog :: String -> IO ()
-appendDebugLog msg = appendFile "debug.log" (msg ++ "\n")
 
 data Options = MkOptions
   { -- | Allows to set the height of the chart.

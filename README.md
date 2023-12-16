@@ -41,6 +41,24 @@ hpack
 cabal build
 cabal run roebling-exe  -- --method GET http://www.github.com/ --rate 20 --duration 30
 ```
+`roebling-exe` takes a number of command line arguments. Here is the currently supported subset:
+
+```
+Available options:
+  -r,--rate ARG            The request rate per second to issue against the
+                           targets. Give 0 then it will send requests as fast as
+                           possible. (default: 0)
+  -d,--duration ARG        The amount of time to issue requests to the targets.
+                           Give 0s for an infinite attack. (default: 0)
+  -m,--method ARG          An HTTP request method for each request.
+                           (default: "GET")
+  -b,--body ARG            A request body to be sent.
+  -B,--body-file ARG       The path to file whose content will be set as the
+                           http request body.
+  target                   The target to attack
+```
+
+There are a number of other arguments as well, which you'll see if you do `cabal run roebling-exe  -- -h`. Only the above ones are functional as of 12/15/23.
 
 ## The long version
 

@@ -38,6 +38,17 @@ make single # start fastapi server, if not already started
 make dev
 ```
 
+# Request with body
+
+You can run the demo for a request with a body file using:
+
+```
+make mega_demo # start fastapi server - run in a different terminal
+```
+
+```
+make post_demo
+```
 
 # Run tests
 
