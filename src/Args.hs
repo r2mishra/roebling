@@ -13,7 +13,7 @@ data Flags = Flags
     method :: Text,
     body :: Maybe Text,
     bodyFile :: Maybe FilePath,
-    --- Dummy Args simply borrowed from Ali. --- 
+    --- Dummy Args simply borrowed from Ali. ---
     headers :: Map String String,
     maxBody :: Int,
     version :: Bool,

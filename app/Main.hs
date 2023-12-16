@@ -12,6 +12,7 @@ import Control.Concurrent (forkIO)
 import Control.Concurrent.Async
 import Control.Concurrent.Chan (Chan, newChan, readChan)
 import Control.Monad
+import Control.Monad.IO.Class (liftIO)
 import Data.Time (NominalDiffTime)
 import GHC.Conc.IO (threadDelay)
 import qualified GHC.Conc.Sync
@@ -21,7 +22,6 @@ import qualified GUI.Widgets as W
 import Options.Applicative
 import System.IO
 import qualified Utils.Models as Models
-import Control.Monad.IO.Class (liftIO)
 
 main :: IO ()
 main = do
@@ -41,7 +41,8 @@ main = do
 
   initializeAndRunPlot cmdFlags attackChannel
   wait attackerThread
-  -- wait fetcherThread
+
+-- wait fetcherThread
 
 buildTargetter :: Args.Flags -> Models.Target
 buildTargetter cmdFlags =
@@ -84,7 +85,6 @@ initializeAndRunPlot cmdFlags chan = do
             _hitCount = (duration cmdFlags) * (rate cmdFlags),
             _pbState = 0.0,
             _numSuccess = 0
-
           }
   bchan <- newBChan 10000
   -- updates latencies in a new thread
