@@ -73,4 +73,4 @@ Head over to [SETUP.md](/SETUP.md) for instructions on build management and runn
 # References
 - [Ali](https://github.com/nakabonne/ali) - Reference load testing library implemented in Go
 - [Vegeta](https://github.com/tsenart/vegeta) - Go library implementing Pacer and Attacker modules used in Ali 
-- [Asciichart](https://github.com/madnight/asciichart) - Reference for the core plotting logic.
+- [Asciichart](https://github.com/madnight/asciichart) - Reference for the core plotting logic. The code for getting a formatted list of strings from a list of latencies is taken from asciichart. We've built on top of this to resize the plot to fit terminal width and also add other widgets.
